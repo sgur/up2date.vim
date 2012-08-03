@@ -26,34 +26,78 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
+
 function! up2date#update(src)
   let source = s:select_source(a:src)
   if empty(source)
     echoerr 'up2date: source file not found!'
     return
   endif
-  echo s:update(source)
+  let repos = up2date#line#parse_file(source)
+  call s:process(repos)
 endfunction
 
 
+" Vim user directory
+let s:vim_user_dir = expand((has('win32') || has('win64'))
+      \ ? '~/vimfiles/' : '~/.vim/')
+" Bundle directory
+let s:bundle_dir = s:vim_user_dir.'bundle/'
+
+
 function! s:select_source(src)
-  return empty(a:src) ?
-        \ get(g:, 'up2date_source_path', s:default_source_path('~/')) :
-        \ (filereadable(expand(a:src)) ? expand(a:src) : '')
+  return empty(a:src)
+        \ ? expand(get(g:, 'up2date_source_path', s:default_source_path('~/')))
+        \ : (filereadable(expand(a:src)) ? expand(a:src) : '')
 endfunction
 
 
 function! s:default_source_path(dir)
   let dir = (a:dir !~ '/$') ? a:dir.'/' : a:dir
-  let lists =  filter(map([dir,'.vimrc', dir.'_vimrc'], 'expand(v:val)'),
-        \ 'filereadable(v:val)',
-        \ )
+  let lists =  filter(
+        \ map([dir,'.vimrc', dir.'_vimrc'], 'expand(v:val)'),
+        \ 'filereadable(v:val)')
   return !empty(lists) ? lists[0] : ''
 endfunction
 
 
-function! s:update(rcfile)
-  return a:rcfile
+function! s:process(repos)
+  for r in a:repos
+    if empty(r.target)
+      echoerr 'invalid "BUNDLE:" line:' r.url
+    endif
+    let dir = expand(s:bundle_dir.r.target)
+    if isdirectory(dir)
+      call s:update(r, dir)
+    elseif !isdirectory(dir.'~')
+      call s:checkout(r)
+    else
+      echomsg 'Don''t update' dir
+      continue
+    endif
+  endfor
+endfunction
+
+
+function! s:update(repo, dir)
+  let owd = getcwd()
+  try
+    lcd `=a:dir`
+    call up2date#scm#{a:repo.scm}#update(a:repo.branch, a:repo.revision)
+  finally
+    lcd `=owd`
+  endtry
+endfunction
+
+
+function! s:checkout(repo)
+  let owd = getcwd()
+  try
+    lcd `=s:bundle_dir`
+    call up2date#scm#{a:repo.scm}#checkout(a:repo.url, a:repo.branch, a:repo.revision, a:repo.target)
+  finally
+    lcd `=owd`
+  endtry
 endfunction
 
 
@@ -67,6 +111,7 @@ function! up2date#sid()  "{{{
 endfunction "}}}
 nnoremap <SID>  <SID>
 " }}}
+
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
