@@ -27,38 +27,37 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 
-function! up2date#line#parse_file(file)
-  return filereadable(a:file) ?
-        \ map(filter(map(readfile(a:file), 's:extract(v:val)'),
-        \ '!empty(v:val)'),
-        \ 'up2date#line#parse_line(v:val)') :
-        \ {'scm'     : '',
-        \  'target'   : '',
-        \  'url'      : '',
-        \  'branch'   : '',
-        \  'revision' : '' }
+function! up2date#line#extract(line)
+  let matches = matchlist(a:line, 'BUNDLE:\s*\(.\+\)$')
+  return empty(matches) ? '' : matches[1]
 endfunction
 
 
-function! up2date#line#parse_line(line)
+function! up2date#line#parse(line)
   let opt = s:parse_options(a:line)
   let repo = s:scm_from_line(opt.url)
-  return {'scm'     : !empty(opt.scm) ? opt.scm : repo.scm,
+  return {
+        \ 'branch'   : opt.branch,
+        \ 'line'     : a:line,
+        \ 'revision' : opt.revision,
+        \ 'scm'     : !empty(opt.scm) ? opt.scm : repo.scm,
         \ 'target'   : !empty(opt.target) ? opt.target : repo.dir,
         \ 'url'      : repo.url,
-        \ 'branch'   : opt.branch,
-        \ 'revision' : opt.revision }
+        \ }
 endfunction
 
 
 function! s:parse_options(line)
   let options = {
-        \ 'url'      : '',
-        \ 'revision' : '',
         \ 'branch'   : '',
-        \ 'target'   : '',
+        \ 'revision' : '',
         \ 'scm'      : '',
+        \ 'target'   : '',
+        \ 'url'      : '',
         \ }
+  if empty(a:line)
+    return options
+  endif
   let items = split(a:line)
   let options.url = items[0]
   for elem in items[1:]
@@ -74,6 +73,7 @@ function! s:parse_options(line)
   endfor
   return options
 endfunction
+
 
 
 function! s:scm_from_line(line)
@@ -92,12 +92,6 @@ function! s:scm_from_line(line)
   return {'scm' : 'unknown',
         \ 'dir' : '',
         \ 'url' : a:line }
-endfunction
-
-
-function! s:extract(line)
-  let matches = matchlist(a:line, 'BUNDLE: *\(.\+\)$')
-  return empty(matches) ? '' : matches[1]
 endfunction
 
 

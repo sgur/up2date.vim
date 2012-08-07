@@ -6,9 +6,18 @@ describe 'autoload/up2date/line.vim'
     Expect Call('s:extract', 'abc" defgh') == ''
     Expect Call('s:extract', 'ab"c"de"fgh') == ''
     Expect Call('s:extract', 'a"bcdefgh') == ''
+    Expect Call('s:extract', '" abcdefgh') == ''
+    Expect Call('s:extract', '"abcdefgh') == ''
     Expect Call('s:extract', 'BUNDLE:abcdefgh') == 'abcdefgh'
     Expect Call('s:extract', 'BUNDLE: abcdefgh') == 'abcdefgh'
     Expect Call('s:extract', '" BUNDLE: abcdefgh') == 'abcdefgh'
+  end
+
+  it 'should extract url'
+    Expect Call('s:parse_options', 'git://github.com/Shougo/neocomplcache.git @abc32f').url
+          \ == 'git://github.com/Shougo/neocomplcache.git'
+    Expect Call('s:parse_options', 'git://github.com/Shougo/neocomplcache.git').url
+          \ == 'git://github.com/Shougo/neocomplcache.git'
   end
 
   it 'should detect scm revision'
@@ -58,25 +67,25 @@ describe 'autoload/up2date/line.vim'
   end
 
   it 'should parse line'
-    let opt = Call('up2date#line#parse_line', 'git://github.com/Shougo/neocomplcache.git @abc32f')
+    let opt = Call('up2date#line#parse', 'BUNDLE: git://github.com/Shougo/neocomplcache.git @abc32f')
     Expect opt.scm == 'git'
     Expect opt.url == 'git://github.com/Shougo/neocomplcache.git'
     Expect opt.revision == 'abc32f'
     Expect opt.branch == ''
     Expect opt.target == 'neocomplcache'
-    let opt = Call('up2date#line#parse_line', 'git://github.com/Shougo/neocomplcache.git +develop /neocomplcache')
+    let opt = Call('up2date#line#parse', 'BUNDLE: git://github.com/Shougo/neocomplcache.git +develop /neocomplcache')
     Expect opt.scm == 'git'
     Expect opt.url == 'git://github.com/Shougo/neocomplcache.git'
     Expect opt.revision == ''
     Expect opt.branch == 'develop'
     Expect opt.target == 'neocomplcache'
-    let opt = Call('up2date#line#parse_line', 'git://github.com/Shougo/neocomplcache.git +develop')
+    let opt = Call('up2date#line#parse', '" BUNDLE:git://github.com/Shougo/neocomplcache.git +develop')
     Expect opt.scm == 'git'
     Expect opt.url == 'git://github.com/Shougo/neocomplcache.git'
     Expect opt.revision == ''
     Expect opt.branch == 'develop'
     Expect opt.target == 'neocomplcache'
-    let opt = Call('up2date#line#parse_line', 'git://github.com/Shougo/neocomplcache.git')
+    let opt = Call('up2date#line#parse', '"BUNDLE: git://github.com/Shougo/neocomplcache.git')
     Expect opt.scm == 'git'
     Expect opt.url == 'git://github.com/Shougo/neocomplcache.git'
     Expect opt.revision == ''

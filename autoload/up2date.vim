@@ -29,12 +29,14 @@ set cpo&vim
 
 function! up2date#update(src)
   let source = s:select_source(a:src)
-  if empty(source)
+  if !filereadable(source)
     echoerr 'up2date: source file not found!'
     return
   endif
-  let repos = up2date#line#parse_file(source)
-  call s:process(repos)
+  let repos = map(map(filter(map(readfile(source), 'up2date#line#extract(v:val)'),
+        \ '!empty(v:val)'),
+        \ 'up2date#line#parse(v:val)'),
+        \ 's:process(v:val)')
 endfunction
 
 
@@ -61,20 +63,19 @@ function! s:default_source_path(dir)
 endfunction
 
 
-function! s:process(repos)
-  for r in a:repos
-    if empty(r.target)
-      echoerr 'invalid "BUNDLE:" line:' r.url
-    endif
-    if isdirectory(dir)
-      call s:scm_cmd('update', r, expand(s:bundle_dir.r.target))
-    elseif !isdirectory(dir.'~')
-      call s:scm_cmd('checkout', r, expand(s:bundle_dir))
-    else
-      echomsg 'Don''t update' r.target
-      continue
-    endif
-  endfor
+function! s:process(repo)
+  if empty(a:repo.target) || a:repo.scm == 'unknown'
+    echoerr 'Invalid "BUNDLE:" line:' a:repo.line
+  endif
+  let dir = expand(s:bundle_dir.a:repo.target)
+  if isdirectory(dir)
+    call s:scm_cmd('update', a:repo, dir)
+  elseif !isdirectory(dir.'~')
+    call s:scm_cmd('checkout', a:repo, expand(s:bundle_dir))
+  else
+    echomsg 'Don''t update' a:repo.target
+    continue
+  endif
 endfunction
 
 
