@@ -66,35 +66,27 @@ function! s:process(repos)
     if empty(r.target)
       echoerr 'invalid "BUNDLE:" line:' r.url
     endif
-    let dir = expand(s:bundle_dir.r.target)
     if isdirectory(dir)
-      call s:update(r, dir)
+      call s:scm_cmd('update', r, expand(s:bundle_dir.r.target))
     elseif !isdirectory(dir.'~')
-      call s:checkout(r)
+      call s:scm_cmd('checkout', r, expand(s:bundle_dir))
     else
-      echomsg 'Don''t update' dir
+      echomsg 'Don''t update' r.target
       continue
     endif
   endfor
 endfunction
 
 
-function! s:update(repo, dir)
+function! s:scm_cmd(cmd, repo, dir)
   let owd = getcwd()
   try
     lcd `=a:dir`
-    call up2date#scm#{a:repo.scm}#update(a:repo.branch, a:repo.revision)
-  finally
-    lcd `=owd`
-  endtry
-endfunction
-
-
-function! s:checkout(repo)
-  let owd = getcwd()
-  try
-    lcd `=s:bundle_dir`
-    call up2date#scm#{a:repo.scm}#checkout(a:repo.url, a:repo.branch, a:repo.revision, a:repo.target)
+    if a:cmd == 'update'
+      call up2date#scm#{a:repo.scm}#update(a:repo.branch, a:repo.revision)
+    else
+      call up2date#scm#{a:repo.scm}#checkout(a:repo.url, a:repo.branch, a:repo.revision, a:repo.target)
+    endif
   finally
     lcd `=owd`
   endtry
