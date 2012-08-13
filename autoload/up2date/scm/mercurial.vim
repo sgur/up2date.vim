@@ -29,7 +29,7 @@ endfunction
 
 
 function! up2date#scm#mercurial#update(branch, revision)
-  let opt = !empty(revision) ? '-rev '.a:revision : ''
+  let opt = !empty(a:revision) ? '-rev '.a:revision : ''
   echo system(join([s:exec(), 'pull', '--update', opt]))
 endfunction
 
