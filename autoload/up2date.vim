@@ -74,15 +74,16 @@ function! s:process(repo)
     call s:scm_cmd('checkout', a:repo, expand(s:bundle_dir))
   else
     echomsg 'Don''t update' a:repo.target
-    continue
   endif
 endfunction
 
 
 function! s:scm_cmd(cmd, repo, dir)
   let owd = getcwd()
+  let more = &more
+  lcd `=a:dir`
+  set nomore
   try
-    lcd `=a:dir`
     if a:cmd == 'update'
       call up2date#scm#{a:repo.scm}#update(a:repo.branch, a:repo.revision)
     else
@@ -90,6 +91,7 @@ function! s:scm_cmd(cmd, repo, dir)
     endif
   finally
     lcd `=owd`
+    let &more = more
   endtry
 endfunction
 
