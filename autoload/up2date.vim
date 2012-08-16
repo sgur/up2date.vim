@@ -72,7 +72,7 @@ let s:bundle_dir = s:vim_user_dir.'bundle/'
 
 
 function! s:cycle_filetype(is_update)
-  if !is_update
+  if !a:is_update
     return
   endif
   " reload ftplugin.vim
