@@ -33,7 +33,10 @@ function! up2date#update(src)
     echoerr 'up2date: source file not found!'
     return
   endif
-  call map(s:collect_repos(source), 's:process(v:val)')
+  let newplugins =
+        \ filter(map(s:collect_repos(source), 's:process(v:val)'),
+        \ 'v:val')
+  call s:cycle_filetype(len(newplugins))
 endfunction
 
 
@@ -43,8 +46,11 @@ function! up2date#update_bundle(bundle)
     echoerr 'up2date: source file not found!'
     return
   endif
-  call map(filter(s:collect_repos(source), 'v:val.target == a:bundle'),
-        \ 's:process(v:val)')
+  let newplugins =
+        \ filter(map(filter(s:collect_repos(source), 'v:val.target == a:bundle'),
+        \ 's:process(v:val)'),
+        \ 'v:val')
+  call s:cycle_filetype(len(newplugins))
 endfunction
 
 
@@ -63,6 +69,16 @@ let s:vim_user_dir = expand((has('win32') || has('win64'))
       \ ? '~/vimfiles/' : '~/.vim/')
 " Bundle directory
 let s:bundle_dir = s:vim_user_dir.'bundle/'
+
+
+function! s:cycle_filetype(is_update)
+  if !is_update
+    return
+  endif
+  " reload ftplugin.vim
+  filetype off
+  filetype on
+endfunction
 
 
 function! s:select_source(src)
@@ -86,13 +102,17 @@ function! s:process(repo)
     echoerr 'Invalid "BUNDLE:" line:' a:repo.line
   endif
   let dir = expand(s:bundle_dir.a:repo.target)
+  let new_plugin = 0
   if isdirectory(dir)
     call s:scm_cmd('update', a:repo, dir)
   elseif !isdirectory(dir.'~')
     call s:scm_cmd('checkout', a:repo, expand(s:bundle_dir))
+    let &runtimepath = join([dir, &runtimepath, expand(dir.'/after')], ',')
+    let new_plugin = 1
   else
     echomsg 'Don''t update' a:repo.target
   endif
+  return new_plugin
 endfunction
 
 
