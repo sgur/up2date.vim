@@ -28,6 +28,5 @@ if exists('g:loaded_up2date') && g:loaded_up2date
 endif
 let g:loaded_up2date = 1
 
-if !exists(':Up2date')
-  command! -complete=file -nargs=? Up2date call up2date#update(<q-args>)
-endif
+command! -complete=file -nargs=? Up2date call up2date#update(<q-args>)
+command! -complete=customlist,up2date#bundle_complete -nargs=1 Up2dateBundle call up2date#update_bundle(<q-args>)

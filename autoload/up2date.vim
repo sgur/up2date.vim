@@ -33,10 +33,28 @@ function! up2date#update(src)
     echoerr 'up2date: source file not found!'
     return
   endif
-  let repos = map(map(filter(map(readfile(source), 'up2date#line#extract(v:val)'),
-        \ '!empty(v:val)'),
-        \ 'up2date#line#parse(v:val)'),
+  call map(s:collect_repos(source), 's:process(v:val)')
+endfunction
+
+
+function! up2date#update_bundle(bundle)
+  let source = s:select_source('')
+  if !filereadable(source)
+    echoerr 'up2date: source file not found!'
+    return
+  endif
+  call map(filter(s:collect_repos(source), 'v:val.target == a:bundle'),
         \ 's:process(v:val)')
+endfunction
+
+
+function! up2date#bundle_complete(arglead, cmdline, cursorpos)
+  let source = s:select_source('')
+  if !filereadable(source)
+    return []
+  endif
+  return filter(map(s:collect_repos(source), 'v:val.target'),
+        \ 'match(v:val, a:arglead) > -1')
 endfunction
 
 
@@ -93,6 +111,13 @@ function! s:scm_cmd(cmd, repo, dir)
     lcd `=owd`
     let &more = more
   endtry
+endfunction
+
+
+function! s:collect_repos(file)
+  return map(filter(map(readfile(a:file), 'up2date#line#extract(v:val)'),
+        \ '!empty(v:val)'),
+        \ 'up2date#line#parse(v:val)')
 endfunction
 
 
