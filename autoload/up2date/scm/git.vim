@@ -33,19 +33,22 @@ function! up2date#scm#git#update(branch, revision)
   if !empty(a:branch)
     echo system(join([s:exec(), 'checkout', a:branch]))
   endif
-  let hash = split(system(join([s:exec(), 'log', '--oneline', '-1', '--format=%h'])))[0]
-  echo system(join([s:exec(), 'pull', '--rebase']))
-  echo system(join([s:exec(), 'log', '--oneline', hash.'..HEAD']))
+  let msg = system(join([s:exec(), 'fetch']))
+  if !empty(a:revision)
+    echo system(join([s:exec(), 'checkout', a:revision]))
+  elseif !empty(msg) && v:shell_error == 0
+    let hash = split(system(join([s:exec(), 'log', '--oneline', '-1', '--format=%h'])))[0]
+    echo system(join([s:exec(), 'pull', '--rebase']))
+    echo system(join([s:exec(), 'log', '--oneline', hash.'..HEAD']))
+  endif
 endfunction
 
 
 function! up2date#scm#git#checkout(url, branch, revision, target)
   echomsg 'git clone' 'at' getcwd()
   let opt = !empty(a:branch) ? '--branch '.a:branch : ''
-  let cmd = join([s:exec(), 'clone', opt, a:url, a:target])
-  echo system(cmd)
+  echo system(join([s:exec(), 'clone', opt, a:url, a:target]))
   if !empty(a:revision)
-    let cmd = join([s:exec(), 'checkout', opt, a:revision])
-    echo system(cmd)
+    echo system(join([s:exec(), 'checkout', opt, a:revision]))
   endif
 endfunction

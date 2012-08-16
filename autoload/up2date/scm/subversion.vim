@@ -23,17 +23,23 @@
 " }}}
 "=============================================================================
 
-function s:exec()
+function! s:exec()
   return get(g:, 'up2date_subversion_executable', 'svn')
 endfunction
 
 
 function! up2date#scm#subversion#update(branch, revision)
-  echo system(join([s:exec(), 'update']))
+  echomsg 'svn update at' getcwd()
+  if !empty(a:branch)
+    echo system(join([s:exec(), 'switch', a:branch]))
+  endif
+  let opt = !empty(a:revision) ? '--revision '.a:revision : ''
+  echo system(join([s:exec(), 'update', opt]))
 endfunction
 
 
 function! up2date#scm#subversion#checkout(url, branch, revision, target)
+  echomsg 'svn checkout at' getcwd()
   let opt = !empty(a:revision) ? '--revision '.a:revision : ''
   echo system(join([s:exec(), 'checkout', opt, a:url, a:target]))
 endfunction

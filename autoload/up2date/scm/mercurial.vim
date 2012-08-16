@@ -29,12 +29,26 @@ endfunction
 
 
 function! up2date#scm#mercurial#update(branch, revision)
-  let opt = !empty(a:revision) ? '-rev '.a:revision : ''
-  echo system(join([s:exec(), 'pull', '--update', opt]))
+  echomsg 'hg pull at' getcwd()
+  if !empty(a:revision)
+    echo system(join([s:exec(), 'pull', '--update', '-rev '.a:revision]))
+    return
+  endif
+  if !empty(a:branch)
+    echo system(join([s:exec(), 'branch', a:branch]))
+  endif
+  call system(join([s:exec(), 'incoming']))
+  if v:shell_error == 0
+    let rev = system(join([s:exec(), 'log', '--template {rev}', '-l 1']))
+    echo system(join([s:exec(), 'pull', '--update']))
+    echo system(join([s:exec(), 'log', '--rev', rev.'..tip',
+          \ '--template {node|short} {desc|strip|firstline}\n']))
+  endif
 endfunction
 
 
 function! up2date#scm#mercurial#checkout(url, branch, revision, target)
+  echomsg 'hg clone at' getcwd()
   let opt = !empty(a:revision)
         \ ? ' --rev '.a:revision
         \ : (!empty(a:branch) ? ' --branch '.a:branch : '')
