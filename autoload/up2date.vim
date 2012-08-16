@@ -107,7 +107,11 @@ function! s:process(repo)
     call s:scm_cmd('update', a:repo, dir)
   elseif !isdirectory(dir.'~')
     call s:scm_cmd('checkout', a:repo, expand(s:bundle_dir))
-    let &runtimepath = join([dir, &runtimepath, expand(dir.'/after')], ',')
+    let &runtimepath = dir.','.&runtimepath
+    let after_dir = expand(dir.'/after')
+    if isdirectory(after_dir)
+      let &runtimepath .= ','.afterdir
+    endif
     let new_plugin = 1
   else
     echomsg 'Don''t update' a:repo.target
