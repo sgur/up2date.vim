@@ -42,7 +42,7 @@ function! up2date#scm#mercurial#update(branch, revision)
     let rev = system(join([s:exec(), 'log', '--template {rev}', '-l 1']))
     echo system(join([s:exec(), 'pull', '--update']))
     echo system(join([s:exec(), 'log', '--rev', rev.'..tip',
-          \ '--template {node|short} {desc|strip|firstline}\n']))
+          \ '--template ''{node|short} {desc|strip|firstline}\n''']))
   endif
 endfunction
 
