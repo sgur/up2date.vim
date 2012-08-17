@@ -27,6 +27,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 
+" `:Up2date [<source_file>]`
 function! up2date#update(src)
   let source = s:select_source(a:src)
   if !filereadable(source)
@@ -40,6 +41,7 @@ function! up2date#update(src)
 endfunction
 
 
+" `:Up2dateBundle <bundle_name>`
 function! up2date#update_bundle(bundle)
   let source = s:select_source('')
   if !filereadable(source)
@@ -54,7 +56,8 @@ function! up2date#update_bundle(bundle)
 endfunction
 
 
-function! up2date#bundle_complete(arglead, cmdline, cursorpos)
+" Complete helper funcition for `:Up2dateBundle`
+function! up2date#complete(arglead, cmdline, cursorpos)
   let source = s:select_source('')
   if !filereadable(source)
     return []
@@ -67,10 +70,15 @@ endfunction
 " Vim user directory
 let s:vim_user_dir = expand((has('win32') || has('win64'))
       \ ? '~/vimfiles/' : '~/.vim/')
+
+
 " Bundle directory
-let s:bundle_dir = s:vim_user_dir.'bundle/'
+function! s:bundle_dir()
+  return expand(get(g:, 'up2date_bundle_dir', s:vim_user_dir.'bundle').'/')
+endfunction
 
 
+" Cycle filetype off -> on
 function! s:cycle_filetype(is_update)
   if !a:is_update
     return
@@ -101,12 +109,12 @@ function! s:process(repo)
   if empty(a:repo.target) || a:repo.scm == 'unknown'
     echoerr 'Invalid "BUNDLE:" line:' a:repo.line
   endif
-  let dir = expand(s:bundle_dir.a:repo.target)
+  let dir = expand(s:bundle_dir().a:repo.target)
   let new_plugin = 0
   if isdirectory(dir)
     call s:scm_cmd('update', a:repo, dir)
   elseif !isdirectory(dir.'~')
-    call s:scm_cmd('checkout', a:repo, expand(s:bundle_dir))
+    call s:scm_cmd('checkout', a:repo, expand(s:bundle_dir()))
     let &runtimepath = dir.','.&runtimepath
     let after_dir = expand(dir.'/after')
     if isdirectory(after_dir)
