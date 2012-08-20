@@ -67,6 +67,20 @@ function! up2date#complete(arglead, cmdline, cursorpos)
 endfunction
 
 
+
+" :Up2dateLine
+function! up2date#update_line()
+  let line = up2date#line#extract(getline('.'))
+  if empty(line)
+    echohl WarningMsg |echomsg 'No bundle lines are found.' | echohl None
+    return
+  endif
+
+  let repo = up2date#line#parse(line)
+  call s:process(repo)
+endfunction
+
+
 " Vim user directory
 let s:vim_user_dir = expand((has('win32') || has('win64'))
       \ ? '~/vimfiles/' : '~/.vim/')
