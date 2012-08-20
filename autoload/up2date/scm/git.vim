@@ -28,18 +28,51 @@ function! s:exec()
 endfunction
 
 
+let s:workers = 0
+
+
+function! up2date#scm#git#do_update(temp_name)
+  if !empty(readfile(a:temp_name))
+    let hash = split(system(join([s:exec(), 'log', '--oneline', '-1', '--format=%h'])))[0]
+    echo system(join([s:exec(), 'pull', '--rebase']))
+    echo system(join([s:exec(), 'log', '--oneline', hash.'..HEAD']))
+  endif
+  let s:workers -= 1
+endfunction
+
+
+function! s:check_update()
+  while s:workers >= 4
+    sleep 100m
+  endwhile
+  let s:workers += 1
+  let cmd = join([s:exec(), 'fetch'])
+  let Fn = function('up2date#scm#git#do_update')
+  if exists('g:loaded_asynccommand')
+    call asynccommand#run(cmd, Fn)
+  else
+    let log = system(cmd)
+    let tempfile = tempname()
+    try
+      call writefile(split(log), tempfile) 
+      call up2date#scm#git#do_update(tempfile)
+    catch
+    finally
+      call delete(tempfile)
+    endtry
+  endif
+endfunction
+
+
 function! up2date#scm#git#update(branch, revision)
   echomsg 'git pull at' getcwd()
   if !empty(a:branch)
     echo system(join([s:exec(), 'checkout', a:branch]))
   endif
-  let msg = system(join([s:exec(), 'fetch']))
   if !empty(a:revision)
-    echo system(join([s:exec(), 'checkout', a:revision]))
-  elseif !empty(msg) && v:shell_error == 0
-    let hash = split(system(join([s:exec(), 'log', '--oneline', '-1', '--format=%h'])))[0]
-    echo system(join([s:exec(), 'pull', '--rebase']))
-    echo system(join([s:exec(), 'log', '--oneline', hash.'..HEAD']))
+    call system(join([s:exec(), 'checkout', a:revision]))
+  else
+    call s:check_update()
   endif
 endfunction
 
