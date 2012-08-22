@@ -30,15 +30,21 @@ endfunction
 
 let s:workers = 0
 
+let s:cb_base = {
+      \ 'cwd' : '',
+      \ }
 
-function! up2date#scm#git#do_update(temp_name)
-  if !empty(readfile(a:temp_name))
+function! s:cb_base.get(temp_name) dict
+  if getfsize(a:temp_name) > 0
+    lcd `=self.cwd`
+    echomsg 'git pull:' getcwd()
     let hash = split(system(join([s:exec(), 'log', '--oneline', '-1', '--format=%h'])))[0]
-    echo system(join([s:exec(), 'pull', '--rebase']))
+    call system(join([s:exec(), 'rebase', '-f', 'origin']))
     echo system(join([s:exec(), 'log', '--oneline', hash.'..HEAD']))
   endif
   let s:workers -= 1
 endfunction
+
 
 
 function! s:check_update()
@@ -47,15 +53,18 @@ function! s:check_update()
   endwhile
   let s:workers += 1
   let cmd = join([s:exec(), 'fetch'])
-  let Fn = function('up2date#scm#git#do_update')
+  " let Fn = function('up2date#scm#git#do_update')
+  let cb = copy(s:cb_base)
+  let cb.cwd = getcwd()
   if exists('g:loaded_asynccommand')
-    call asynccommand#run(cmd, Fn)
+    echomsg 'git fetch:' getcwd()
+    call asynccommand#run(cmd, cb)
   else
     let log = system(cmd)
     let tempfile = tempname()
     try
       call writefile(split(log), tempfile) 
-      call up2date#scm#git#do_update(tempfile)
+      call cb.get(tempfile)
     catch
     finally
       call delete(tempfile)
@@ -65,9 +74,8 @@ endfunction
 
 
 function! up2date#scm#git#update(branch, revision)
-  echomsg 'git pull at' getcwd()
   if !empty(a:branch)
-    echo system(join([s:exec(), 'checkout', a:branch]))
+    call system(join([s:exec(), 'checkout', a:branch]))
   endif
   if !empty(a:revision)
     call system(join([s:exec(), 'checkout', a:revision]))
