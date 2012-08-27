@@ -43,19 +43,31 @@ function! up2date#helper#asynccommand(cmd, env)
   while s:workers >= s:workers_max
     execute 'sleep' s:workers_wait.'m'
   endwhile
-  call s:increment_worker()
-  let env = a:env
-  let env.callback = a:env.get
-  function! env.get(temp_name) dict
-    echomsg self.callback
-    call self.callback(a:temp_name)
-    call s:decrement_worker()
-    if exists('self.is_checkout') && self.is_checkout
-      call up2date#util#source_plugin(self.cwd)
-      call up2date#util#add_runtimepath(self.cwd)
-    endif
-  endfunction
-  call asynccommand#run(a:cmd, env)
+  if exists('g:loaded_asynccommand')
+    call s:increment_worker()
+    let env = a:env
+    let env.callback = a:env.get
+    function! env.get(temp_name) dict
+      echomsg self.callback
+      call self.callback(a:temp_name)
+      call s:decrement_worker()
+      if exists('self.is_checkout') && self.is_checkout
+        call up2date#util#source_plugin(self.cwd)
+        call up2date#util#add_runtimepath(self.cwd)
+      endif
+    endfunction
+    call asynccommand#run(a:cmd, env)
+  else
+    let output = system(a:cmd)
+    let tempfile = tempname()
+    try
+      call writefile(split(output), tempfile)
+      call env.get(tempfile)
+    catch
+    finally
+      call delete(tempfile)
+    endtry
+  endif
 endfunction
 
 
