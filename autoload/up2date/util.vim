@@ -28,3 +28,12 @@ function! up2date#util#source_plugin(dir)
     source `=plugin`
   endfor
 endfunction
+
+function! up2date#util#add_runtimepath(dir)
+  let &runtimepath = a:dir.','.&runtimepath
+  let after_dir = expand(dir.'/after')
+  if isdirectory(after_dir)
+    let &runtimepath .= ','.afterdir
+  endif
+endfunction
+

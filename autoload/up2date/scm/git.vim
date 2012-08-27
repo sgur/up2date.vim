@@ -87,6 +87,7 @@ function! up2date#scm#git#checkout(url, branch, revision, target)
         \ 'cwd' : expand(getcwd().'/'.a:target),
         \ 'rev' : a:revision,
         \ 'get' : function(s:SID.'checkout'),
+        \ 'is_checkout' : 1,
         \ }
   call up2date#helper#asynccommand(cmd, env)
 endfunction

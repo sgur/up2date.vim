@@ -50,7 +50,10 @@ function! up2date#helper#asynccommand(cmd, env)
     echomsg self.callback
     call self.callback(a:temp_name)
     call s:decrement_worker()
-    call up2date#util#source_plugin(self.cwd)
+    if exists('self.is_checkout') && self.is_checkout
+      call up2date#util#source_plugin(self.cwd)
+      call up2date#util#add_runtimepath(self.cwd)
+    endif
   endfunction
   call asynccommand#run(a:cmd, env)
 endfunction
