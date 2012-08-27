@@ -40,7 +40,7 @@ function! s:decrement_worker()
 endfunction
 
 function! up2date#helper#asynccommand(cmd, env)
-  while s:workers >= s:workers_max
+  while s:workers >= get(g:, 'up2date_workers_max', s:workers_max)
     execute 'sleep' s:workers_wait.'m'
   endwhile
   if exists('g:loaded_asynccommand')

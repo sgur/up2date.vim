@@ -28,8 +28,33 @@ function! s:exec()
 endfunction
 
 
+function! s:SID_PREFIX()
+  return matchstr(expand('<sfile>'), '<SNR>\d\+_')
+endfunction
+let s:SID = s:SID_PREFIX()
+
+
+function! s:pull(temp_name) dict
+  if getfsize(a:temp_name) > 0
+    echomsg 'update[mercurial]' '->' self.cwd
+    lcd `=self.cwd`
+    let rev = system(join([s:exec(), 'log', '--template ''{rev}''', '-l 1']))
+    call system(join([s:exec(), 'pull', '--update']))
+    echo system(join([s:exec(), 'log', '--rev', rev.'..tip',
+          \ '--template ''{node|short} {desc|strip|firstline}\n''']))
+    echomsg 'done'
+  else
+    echomsg 'update[mercurial]' '->' self.cwd '(no update)'
+  endif
+endfunction
+
+
+function! s:clone(temp_name) dict
+  echomsg 'checkout[mercurial]' '->' self.cwd 'done'
+endfunction
+
+
 function! up2date#scm#mercurial#update(branch, revision)
-  echomsg 'hg pull at' getcwd()
   if !empty(a:revision)
     echo system(join([s:exec(), 'pull', '--update', '-rev '.a:revision]))
     return
@@ -37,21 +62,25 @@ function! up2date#scm#mercurial#update(branch, revision)
   if !empty(a:branch)
     echo system(join([s:exec(), 'branch', a:branch]))
   endif
-  call system(join([s:exec(), 'incoming']))
-  if v:shell_error == 0
-    let rev = system(join([s:exec(), 'log', '--template ''{rev}''', '-l 1']))
-    echo system(join([s:exec(), 'pull', '--update']))
-    echo system(join([s:exec(), 'log', '--rev', rev.'..tip',
-          \ '--template ''{node|short} {desc|strip|firstline}\n''']))
-  endif
+  let cmd = join([s:exec(), 'incoming', '-q'])
+  let env = {
+        \ 'cwd' : getcwd(),
+        \ 'get' : function(s:SID.'pull'),
+        \ }
+  call up2date#helper#asynccommand(cmd, env)
 endfunction
 
 
 function! up2date#scm#mercurial#checkout(url, branch, revision, target)
-  echomsg 'hg clone at' getcwd()
   let opt = !empty(a:revision)
         \ ? ' --rev '.a:revision
         \ : (!empty(a:branch) ? ' --branch '.a:branch : '')
-  echo system(join([s:exec(), 'clone', opt, a:url, a:target]))
+  let cmd = join([s:exec(), 'clone', opt, a:url, a:target])
+  let env = {
+        \ 'cwd' : expand(getcwd().'/'.a:target),
+        \ 'get' : function(s:SID.'clone'),
+        \ 'is_checkout' : 1,
+        \ }
+  call up2date#helper#asynccommand(cmd, env)
 endfunction
 

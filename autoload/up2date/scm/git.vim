@@ -73,9 +73,7 @@ function! up2date#scm#git#update(branch, revision)
           \ 'cwd' : getcwd(),
           \ 'get' : function(s:SID.'rebase'),
           \ }
-    if exists('g:loaded_asynccommand')
-      call up2date#helper#asynccommand(cmd, env)
-    endif
+    call up2date#helper#asynccommand(cmd, env)
   endif
 endfunction
 

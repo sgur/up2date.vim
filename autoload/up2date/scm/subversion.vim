@@ -28,19 +28,49 @@ function! s:exec()
 endfunction
 
 
+function! s:SID_PREFIX()
+  return matchstr(expand('<sfile>'), '<SNR>\d\+_')
+endfunction
+let s:SID = s:SID_PREFIX()
+
+
+function! s:update(temp_name) dict
+  echomsg 'update[subversion]' '->' self.cwd
+  let lines = split(readfile(a:temp_name))
+  for l in lines
+    echo lines
+  endfor
+  echomsg 'done'
+endfunction
+
+
+function! s:checkout(temp_name) dict
+  echomsg 'checkout[subversion]' '->' self.cwd 'done'
+endfunction
+
+
 function! up2date#scm#subversion#update(branch, revision)
-  echomsg 'svn update at' getcwd()
   if !empty(a:branch)
     echo system(join([s:exec(), 'switch', a:branch]))
   endif
   let opt = !empty(a:revision) ? '--revision '.a:revision : ''
-  echo system(join([s:exec(), 'update', opt]))
+  let cmd = join([s:exec(), 'update', opt])
+  let env = {
+        \ 'cwd' : getcwd(),
+        \ 'get' : function(s:SID.'update'),
+        \ }
+  call up2date#helper#asynccommand(cmd, env)
 endfunction
 
 
 function! up2date#scm#subversion#checkout(url, branch, revision, target)
-  echomsg 'svn checkout at' getcwd()
   let opt = !empty(a:revision) ? '--revision '.a:revision : ''
-  echo system(join([s:exec(), 'checkout', opt, a:url, a:target]))
+  let cmd = join([s:exec(), 'checkout', opt, a:url, a:target])
+  let env = {
+        \ 'cwd' : expand(getcwd().'/'.a:target),
+        \ 'get' : function(s:SID.'checkout'),
+        \ 'is_checkout' : 1,
+        \ }
+  call up2date#helper#asynccommand(cmd, env)
 endfunction
 
