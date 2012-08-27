@@ -34,10 +34,8 @@ function! up2date#update(src)
     echoerr 'up2date: source file not found!'
     return
   endif
-  let newplugins =
-        \ filter(map(s:collect_repos(source), 's:process(v:val)'),
-        \ 'v:val')
-  call s:cycle_filetype(len(newplugins))
+  let is_update = s:update_all(file)
+  call s:cycle_filetype(is_update)
 endfunction
 
 
@@ -48,11 +46,8 @@ function! up2date#update_bundle(bundle)
     echoerr 'up2date: source file not found!'
     return
   endif
-  let newplugins =
-        \ filter(map(filter(s:collect_repos(source), 'v:val.target == a:bundle'),
-        \ 's:process(v:val)'),
-        \ 'v:val')
-  call s:cycle_filetype(len(newplugins))
+  let is_update = s:update_one(source, a:bundle)
+  call s:cycle_filetype(is_update)
 endfunction
 
 
@@ -160,6 +155,24 @@ function! s:collect_repos(file)
   return map(filter(map(readfile(a:file), 'up2date#line#extract(v:val)'),
         \ '!empty(v:val)'),
         \ 'up2date#line#parse(v:val)')
+endfunction
+
+
+function! s:update_all(file)
+  let newplugins = 
+        \ filter(map(s:collect_repos(a:file),
+        \ 's:process(v:val)'),
+        \ 'v:val')
+  return len(newplugins)
+endfunction
+
+
+function! s:update_one(file, bundle)
+  let newplugins =
+        \ filter(map(filter(s:collect_repos(a:file), 'v:val.target == a:bundle'),
+        \ 's:process(v:val)'),
+        \ 'v:val')
+  return len(newplugins)
 endfunction
 
 
