@@ -61,7 +61,6 @@ function! s:checkout(temp_name) dict
 endfunction
 
 
-
 function! up2date#scm#git#update(branch, revision)
   if !empty(a:branch)
     call system(join([s:exec(), 'checkout', a:branch]))

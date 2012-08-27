@@ -1,6 +1,6 @@
 "=============================================================================
-" FILE: autoload/up2date/helper.vim
-" AUTHOR: sgur <sgurrr+vim@gmail.com>
+" FILE: autoload/up2date/util.vim
+" AUTHOR: sgur <sgurrr@gmail.com>
 " License: MIT license  {{{
 "     Permission is hereby granted, free of charge, to any person obtaining
 "     a copy of this software and associated documentation files (the
@@ -23,38 +23,8 @@
 " }}}
 "=============================================================================
 
-let s:save_cpo = &cpo
-set cpo&vim
-
-let s:workers = 0
-let s:workers_max = 4
-let s:workers_wait = 100
-
-function! s:increment_worker()
-  let s:workers += 1
+function! up2date#util#source_plugin(dir)
+  for plugin in split(globpath(a:dir, 'plugin/*.vim'))
+    source `=plugin`
+  endfor
 endfunction
-
-
-function! s:decrement_worker()
-  let s:workers -= 1
-endfunction
-
-function! up2date#helper#asynccommand(cmd, env)
-  while s:workers >= s:workers_max
-    execute 'sleep' s:workers_wait.'m'
-  endwhile
-  call s:increment_worker()
-  let env = a:env
-  let env.callback = a:env.get
-  function! env.get(temp_name) dict
-    echomsg self.callback
-    call self.callback(a:temp_name)
-    call s:decrement_worker()
-    call up2date#util#source_plugin(self.cwd)
-  endfunction
-  call asynccommand#run(a:cmd, env)
-endfunction
-
-
-let &cpo = s:save_cpo
-unlet s:save_cpo
