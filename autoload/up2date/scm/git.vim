@@ -38,9 +38,6 @@ endfunction
 let s:SID = s:SID_PREFIX()
 
 
-let s:workers = 0
-
-
 function! s:rebase(temp_name) dict
   if getfsize(a:temp_name) > 0
     echomsg 'update[git]' '->' self.cwd
@@ -49,8 +46,9 @@ function! s:rebase(temp_name) dict
     call system(join([s:exec(), 'rebase', '-f', 'origin']))
     echo system(join([s:exec(), 'log', '--oneline', hash.'..HEAD']))
     echomsg 'done'
+  else
+    echomsg 'update[git]' '->' self.cwd '(no update)'
   endif
-  let s:workers -= 1
 endfunction
 
 
@@ -60,35 +58,8 @@ function! s:checkout(temp_name) dict
     echo system(join([s:exec(), 'checkout', self.rev]))
   endif
   echomsg 'checkout[git]' '->' self.cwd 'done'
-  let s:workers -= 1
 endfunction
 
-
-
-function! s:check_update()
-  while s:workers >= 4
-    sleep 100m
-  endwhile
-  let s:workers += 1
-  let cmd = join([s:exec(), 'fetch'])
-  let env = {
-        \ 'cwd' : getcwd(),
-        \ 'get' : function(s:SID.'rebase'),
-        \ }
-  if exists('g:loaded_asynccommand')
-    call asynccommand#run(cmd, env)
-  " else
-  "   let log = system(cmd)
-  "   let tempfile = tempname()
-  "   try
-  "     call writefile(split(log), tempfile) 
-  "     call cb.get(tempfile)
-  "   catch
-  "   finally
-  "     call delete(tempfile)
-  "   endtry
-  endif
-endfunction
 
 
 function! up2date#scm#git#update(branch, revision)
@@ -98,16 +69,19 @@ function! up2date#scm#git#update(branch, revision)
   if !empty(a:revision)
     call system(join([s:exec(), 'checkout', a:revision]))
   else
-    call s:check_update()
+    let cmd = join([s:exec(), 'fetch'])
+    let env = {
+          \ 'cwd' : getcwd(),
+          \ 'get' : function(s:SID.'rebase'),
+          \ }
+    if exists('g:loaded_asynccommand')
+      call up2date#helper#asynccommand(cmd, env)
+    endif
   endif
 endfunction
 
 
 function! up2date#scm#git#checkout(url, branch, revision, target)
-  while s:workers >= 4
-    sleep 100m
-  endwhile
-  let s:workers += 1
   let opt = !empty(a:branch) ? '--branch '.a:branch : ''
   let cmd = join([s:exec(), 'clone', opt, a:url, a:target])
   let env = {
@@ -115,7 +89,7 @@ function! up2date#scm#git#checkout(url, branch, revision, target)
         \ 'rev' : a:revision,
         \ 'get' : function(s:SID.'checkout'),
         \ }
-  call asynccommand#run(cmd, env)
+  call up2date#helper#asynccommand(cmd, env)
 endfunction
 
 
