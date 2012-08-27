@@ -34,7 +34,7 @@ function! up2date#update(src)
     echoerr 'up2date: source file not found!'
     return
   endif
-  let is_update = s:update_all(file)
+  let is_update = s:update_all(source)
   call s:cycle_filetype(is_update)
 endfunction
 
