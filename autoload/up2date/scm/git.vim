@@ -23,25 +23,43 @@
 " }}}
 "=============================================================================
 
+let s:save_cpo = &cpo
+set cpo&vim
+
+
 function! s:exec()
   return get(g:, 'up2date_git_executable', 'git')
 endfunction
 
 
+function! s:SID_PREFIX()
+  return matchstr(expand('<sfile>'), '<SNR>\d\+_')
+endfunction
+let s:SID = s:SID_PREFIX()
+
+
 let s:workers = 0
 
-let s:cb_base = {
-      \ 'cwd' : '',
-      \ }
 
-function! s:cb_base.get(temp_name) dict
+function! s:rebase(temp_name) dict
   if getfsize(a:temp_name) > 0
+    echomsg 'update[git]' '->' self.cwd
     lcd `=self.cwd`
-    echomsg 'git pull:' getcwd()
     let hash = split(system(join([s:exec(), 'log', '--oneline', '-1', '--format=%h'])))[0]
     call system(join([s:exec(), 'rebase', '-f', 'origin']))
     echo system(join([s:exec(), 'log', '--oneline', hash.'..HEAD']))
+    echomsg 'done'
   endif
+  let s:workers -= 1
+endfunction
+
+
+function! s:checkout(temp_name) dict
+  if !empty(self.rev)
+    lcd `=self.cwd`
+    echo system(join([s:exec(), 'checkout', self.rev]))
+  endif
+  echomsg 'checkout[git]' '->' self.cwd 'done'
   let s:workers -= 1
 endfunction
 
@@ -53,22 +71,22 @@ function! s:check_update()
   endwhile
   let s:workers += 1
   let cmd = join([s:exec(), 'fetch'])
-  " let Fn = function('up2date#scm#git#do_update')
-  let cb = copy(s:cb_base)
-  let cb.cwd = getcwd()
+  let env = {
+        \ 'cwd' : getcwd(),
+        \ 'get' : function(s:SID.'rebase'),
+        \ }
   if exists('g:loaded_asynccommand')
-    echomsg 'git fetch:' getcwd()
-    call asynccommand#run(cmd, cb)
-  else
-    let log = system(cmd)
-    let tempfile = tempname()
-    try
-      call writefile(split(log), tempfile) 
-      call cb.get(tempfile)
-    catch
-    finally
-      call delete(tempfile)
-    endtry
+    call asynccommand#run(cmd, env)
+  " else
+  "   let log = system(cmd)
+  "   let tempfile = tempname()
+  "   try
+  "     call writefile(split(log), tempfile) 
+  "     call cb.get(tempfile)
+  "   catch
+  "   finally
+  "     call delete(tempfile)
+  "   endtry
   endif
 endfunction
 
@@ -86,10 +104,20 @@ endfunction
 
 
 function! up2date#scm#git#checkout(url, branch, revision, target)
-  echomsg 'git clone' 'at' getcwd()
+  while s:workers >= 4
+    sleep 100m
+  endwhile
+  let s:workers += 1
   let opt = !empty(a:branch) ? '--branch '.a:branch : ''
-  echo system(join([s:exec(), 'clone', opt, a:url, a:target]))
-  if !empty(a:revision)
-    echo system(join([s:exec(), 'checkout', opt, a:revision]))
-  endif
+  let cmd = join([s:exec(), 'clone', opt, a:url, a:target])
+  let env = {
+        \ 'cwd' : expand(getcwd().'/'.a:target),
+        \ 'rev' : a:revision,
+        \ 'get' : function(s:SID.'checkout'),
+        \ }
+  call asynccommand#run(cmd, env)
 endfunction
+
+
+let &cpo = s:save_cpo
+unlet s:save_cpo

@@ -122,6 +122,7 @@ endfunction
 function! s:process(repo)
   if empty(a:repo.target) || a:repo.scm == 'unknown'
     echoerr 'Invalid "BUNDLE:" line:' a:repo.line
+    return
   endif
   let dir = expand(s:bundle_dir().a:repo.target)
   let new_plugin = 0
