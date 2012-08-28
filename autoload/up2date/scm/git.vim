@@ -40,11 +40,14 @@ let s:SID = s:SID_PREFIX()
 
 function! s:rebase(temp_name) dict
   if getfsize(a:temp_name) > 0
-    echomsg 'update[git]' '->' self.cwd
     lcd `=self.cwd`
     let hash = split(system(join([s:exec(), 'log', '--oneline', '-1', '--format=%h'])))[0]
     call system(join([s:exec(), 'rebase', '-f', 'origin']))
-    echo system(join([s:exec(), 'log', '--oneline', hash.'..HEAD']))
+    let changes = split(system(join([s:exec(), 'log', '--oneline', hash.'..HEAD'])))
+    echomsg 'update[git]' '->' self.cwd
+    for c in changes
+      echomsg c
+    endfor
     echomsg 'done'
   else
     echomsg 'update[git]' '->' self.cwd '(no update)'

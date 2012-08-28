@@ -36,12 +36,15 @@ let s:SID = s:SID_PREFIX()
 
 function! s:pull(temp_name) dict
   if getfsize(a:temp_name) > 0
-    echomsg 'update[mercurial]' '->' self.cwd
     lcd `=self.cwd`
     let rev = system(join([s:exec(), 'log', '--template ''{rev}''', '-l 1']))
     call system(join([s:exec(), 'pull', '--update']))
-    echo system(join([s:exec(), 'log', '--rev', rev.'..tip',
+    let changes = system(join([s:exec(), 'log', '--rev', rev.'..tip',
           \ '--template ''{node|short} {desc|strip|firstline}\n''']))
+    echomsg 'update[mercurial]' '->' self.cwd
+    for c in changes
+      echomsg c
+    endfor
     echomsg 'done'
   else
     echomsg 'update[mercurial]' '->' self.cwd '(no update)'

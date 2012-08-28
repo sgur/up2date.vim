@@ -35,12 +35,16 @@ let s:SID = s:SID_PREFIX()
 
 
 function! s:update(temp_name) dict
-  echomsg 'update[subversion]' '->' self.cwd
   let lines = split(readfile(a:temp_name))
-  for l in lines
-    echo lines
-  endfor
-  echomsg 'done'
+  if !empty(lines)
+    echomsg 'update[subversion]' '->' self.cwd
+    for l in lines
+      echo lines
+    endfor
+    echomsg 'done'
+  else
+    echomsg 'update[subversion]' '->' self.cwd '(no update)'
+  endif
 endfunction
 
 
