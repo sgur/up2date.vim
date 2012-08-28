@@ -62,6 +62,15 @@ function! up2date#complete(arglead, cmdline, cursorpos)
 endfunction
 
 
+function! up2date#status(src)
+  let source = s:select_source(a:src)
+  if !filereadable(source)
+    echoerr 'up2date: source file not found!'
+    return
+  endif
+  call s:diff_bundles(source)
+endfunction
+
 
 " :Up2dateLine
 function! up2date#update_line()
@@ -173,6 +182,23 @@ function! s:update_one(file, bundle)
         \ 's:process(v:val)'),
         \ 'v:val')
   return len(newplugins)
+endfunction
+
+
+function! s:diff_bundles(file)
+  let bundles = map(filter(s:collect_repos(a:file),
+        \ '!empty(v:val)'),
+        \ 'v:val.target')
+  let installed = map(
+        \ split(globpath(s:bundle_dir(), '*')),
+        \ 'fnamemodify(v:val, ":t")'
+        \ )
+  echomsg 'Uninstalled' '['
+        \ join(filter(copy(bundles), 'index(installed, v:val) == -1'))
+        \ ']'
+  echomsg 'Unlisted' '['
+        \ join(filter(copy(installed), 'index(bundles, v:val) == -1'))
+        \ ']'
 endfunction
 
 

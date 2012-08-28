@@ -35,3 +35,6 @@ command! -nargs=1 -complete=customlist,up2date#complete Up2dateBundle
       \ call up2date#update_bundle(<q-args>)
 
 command! -nargs=0 Up2dateAtCursor call up2date#update_line()
+
+command! -nargs=? -complete=file Up2dateStatus
+      \ call up2date#status(<q-args>)
