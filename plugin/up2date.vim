@@ -38,3 +38,8 @@ command! -nargs=0 Up2dateAtCursor call up2date#update_line()
 
 command! -nargs=? -complete=file Up2dateStatus
       \ call up2date#status(<q-args>)
+
+command! -nargs=? -complete=file Up2dateBgStart
+      \ call up2date#start_bg(<q-args>)
+
+command! -nargs=0 Up2dateBgCancel call up2date#cancel_bg()

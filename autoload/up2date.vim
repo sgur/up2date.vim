@@ -202,10 +202,57 @@ function! s:diff_bundles(file)
 endfunction
 
 
+function! up2date#cancel_bg()
+  let s:plugins = []
+  if exists('s:is_override')
+    unlet g:up2date_workers_max
+    unlet s:is_override
+  endif
+  autocmd! up2date_background
+endfunction
+
+
+function! up2date#start_bg(src)
+  let source = s:select_source(a:src)
+  if !filereadable(source)
+    echoerr 'up2date: source file not found!'
+    return
+  endif
+  let s:plugins = s:collect_repos(source)
+  if !exists('g:up2date_workers_max')
+    let g:up2date_workers_max = 1
+    let s:is_override = 1
+  endif
+  augroup up2date_background
+    autocmd!
+    autocmd CursorHold,CursorHoldI * call s:on_cursor_hold(s:plugins)
+  augroup END
+endfunction
+call up2date#start_bg('')
+
+
+function! s:on_cursor_hold(bundles)
+  if !empty(a:bundles)
+    let bundle = a:bundles[0]
+    call s:process(bundle)
+    call remove(a:bundles, 0)
+  else
+    call up2date#cancel_bg()
+  endif
+
+  if mode() ==# 'n'
+    call feedkeys("g\<ESC>", 'n')
+  else
+    call feedkeys("a\<BS>",'n')
+  endif
+endfunction
+
+
 " vspec helper functions. see vspec#hint() {{{
 function! up2date#scope()  "{{{
   return s:
 endfunction "}}}
+
 
 function! up2date#sid()  "{{{
   return maparg('<SID>', 'n')
