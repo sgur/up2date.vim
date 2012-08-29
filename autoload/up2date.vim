@@ -228,7 +228,6 @@ function! up2date#start_bg(src)
     autocmd CursorHold,CursorHoldI * call s:on_cursor_hold(s:plugins)
   augroup END
 endfunction
-call up2date#start_bg('')
 
 
 function! s:on_cursor_hold(bundles)
