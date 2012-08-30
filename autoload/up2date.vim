@@ -35,6 +35,7 @@ function! up2date#update(src)
     return
   endif
   let more = &more
+  set nomore
   try
     let is_update = s:update_all(source)
   catch
@@ -55,6 +56,7 @@ function! up2date#update_bundle(bundle)
     return
   endif
   let more = &more
+  set nomore
   try
     let is_update = s:update_one(source, a:bundle)
   catch
