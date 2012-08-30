@@ -34,8 +34,15 @@ function! up2date#update(src)
     echoerr 'up2date: source file not found!'
     return
   endif
-  let is_update = s:update_all(source)
-  call up2date#worker#wait_until(0)
+  let more = &more
+  try
+    let is_update = s:update_all(source)
+  catch
+    let is_update = 0
+  finally
+    let &more = more
+    call up2date#worker#wait_until(0)
+  endtry
   call s:cycle_filetype(is_update)
 endfunction
 
@@ -47,8 +54,15 @@ function! up2date#update_bundle(bundle)
     echoerr 'up2date: source file not found!'
     return
   endif
-  let is_update = s:update_one(source, a:bundle)
-  call up2date#worker#wait_until(0)
+  let more = &more
+  try
+    let is_update = s:update_one(source, a:bundle)
+  catch
+    let is_update = 0
+  finally
+    let &more = more
+    call up2date#worker#wait_until(0)
+  endtry
   call s:cycle_filetype(is_update)
 endfunction
 
@@ -84,6 +98,34 @@ function! up2date#update_line()
 
   let repo = up2date#line#parse(line)
   call s:process(repo)
+endfunction
+
+
+function! up2date#start_bg(src)
+  let source = s:select_source(a:src)
+  if !filereadable(source)
+    echoerr 'up2date: source file not found!'
+    return
+  endif
+  let s:plugins = s:collect_repos(source)
+  if !exists('g:up2date_workers_max')
+    let g:up2date_workers_max = 1
+    let s:is_override = 1
+  endif
+  augroup up2date_background
+    autocmd!
+    autocmd CursorHold,CursorHoldI * call s:on_cursor_hold(s:plugins)
+  augroup END
+endfunction
+
+
+function! up2date#cancel_bg()
+  let s:plugins = []
+  if exists('s:is_override')
+    unlet g:up2date_workers_max
+    unlet s:is_override
+  endif
+  autocmd! up2date_background
 endfunction
 
 
@@ -146,9 +188,7 @@ endfunction
 
 function! s:scm_cmd(cmd, repo, dir)
   let owd = getcwd()
-  let more = &more
   lcd `=a:dir`
-  set nomore
   try
     if a:cmd == 'update'
       call up2date#scm#{a:repo.scm}#update(a:repo.branch, a:repo.revision)
@@ -157,7 +197,6 @@ function! s:scm_cmd(cmd, repo, dir)
     endif
   finally
     lcd `=owd`
-    let &more = more
   endtry
 endfunction
 
@@ -201,34 +240,6 @@ function! s:diff_bundles(file)
   echomsg 'Unlisted' '['
         \ join(filter(copy(installed), 'index(bundles, v:val) == -1'))
         \ ']'
-endfunction
-
-
-function! up2date#cancel_bg()
-  let s:plugins = []
-  if exists('s:is_override')
-    unlet g:up2date_workers_max
-    unlet s:is_override
-  endif
-  autocmd! up2date_background
-endfunction
-
-
-function! up2date#start_bg(src)
-  let source = s:select_source(a:src)
-  if !filereadable(source)
-    echoerr 'up2date: source file not found!'
-    return
-  endif
-  let s:plugins = s:collect_repos(source)
-  if !exists('g:up2date_workers_max')
-    let g:up2date_workers_max = 1
-    let s:is_override = 1
-  endif
-  augroup up2date_background
-    autocmd!
-    autocmd CursorHold,CursorHoldI * call s:on_cursor_hold(s:plugins)
-  augroup END
 endfunction
 
 
