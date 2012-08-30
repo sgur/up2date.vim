@@ -43,7 +43,8 @@ function! s:rebase(temp_name) dict
     lcd `=self.cwd`
     let hash = split(system(join([s:exec(), 'log', '--oneline', '-1', '--format=%h'])))[0]
     call system(join([s:exec(), 'rebase', '-f', 'origin']))
-    let changes = split(system(join([s:exec(), 'log', '--oneline', hash.'..HEAD'])))
+    let changes = split(system(join([s:exec(), 'log', '--oneline', hash.'..HEAD'])),
+          \ '\r\n\|\n\|\r')
     echomsg 'update[git]' '->' self.cwd
     for c in changes
       echomsg c
