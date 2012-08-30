@@ -70,7 +70,7 @@ function! up2date#scm#mercurial#update(branch, revision)
         \ 'cwd' : getcwd(),
         \ 'get' : function(s:SID.'pull'),
         \ }
-  call up2date#helper#asynccommand(cmd, env)
+  call up2date#worker#asynccommand(cmd, env)
 endfunction
 
 
@@ -84,6 +84,6 @@ function! up2date#scm#mercurial#checkout(url, branch, revision, target)
         \ 'get' : function(s:SID.'clone'),
         \ 'is_checkout' : 1,
         \ }
-  call up2date#helper#asynccommand(cmd, env)
+  call up2date#worker#asynccommand(cmd, env)
 endfunction
 

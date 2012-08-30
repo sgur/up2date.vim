@@ -1,5 +1,5 @@
 "=============================================================================
-" FILE: autoload/up2date/helper.vim
+" FILE: autoload/up2date/worker.vim
 " AUTHOR: sgur <sgurrr+vim@gmail.com>
 " License: MIT license  {{{
 "     Permission is hereby granted, free of charge, to any person obtaining
@@ -27,7 +27,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 let s:workers = 0
-let s:workers_max = 4
+let s:default_max_workers = 2
 let s:workers_wait = 100
 
 function! s:increment_worker()
@@ -39,10 +39,16 @@ function! s:decrement_worker()
   let s:workers -= 1
 endfunction
 
-function! up2date#helper#asynccommand(cmd, env)
-  while s:workers >= get(g:, 'up2date_max_workers', s:workers_max)
+
+function! up2date#worker#wait_until(count) abort
+  while s:workers > a:count
     execute 'sleep' s:workers_wait.'m'
   endwhile
+endfunction
+
+
+function! up2date#worker#asynccommand(cmd, env)
+  call up2date#worker#wait_until(get(g:, 'up2date_max_workers', s:default_max_workers)-1)
   if exists('g:loaded_asynccommand')
     call s:increment_worker()
     let env = a:env

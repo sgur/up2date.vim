@@ -63,7 +63,7 @@ function! up2date#scm#subversion#update(branch, revision)
         \ 'cwd' : getcwd(),
         \ 'get' : function(s:SID.'update'),
         \ }
-  call up2date#helper#asynccommand(cmd, env)
+  call up2date#worker#asynccommand(cmd, env)
 endfunction
 
 
@@ -75,6 +75,6 @@ function! up2date#scm#subversion#checkout(url, branch, revision, target)
         \ 'get' : function(s:SID.'checkout'),
         \ 'is_checkout' : 1,
         \ }
-  call up2date#helper#asynccommand(cmd, env)
+  call up2date#worker#asynccommand(cmd, env)
 endfunction
 

@@ -77,7 +77,7 @@ function! up2date#scm#git#update(branch, revision)
           \ 'cwd' : getcwd(),
           \ 'get' : function(s:SID.'rebase'),
           \ }
-    call up2date#helper#asynccommand(cmd, env)
+    call up2date#worker#asynccommand(cmd, env)
   endif
 endfunction
 
@@ -91,7 +91,7 @@ function! up2date#scm#git#checkout(url, branch, revision, target)
         \ 'get' : function(s:SID.'checkout'),
         \ 'is_checkout' : 1,
         \ }
-  call up2date#helper#asynccommand(cmd, env)
+  call up2date#worker#asynccommand(cmd, env)
 endfunction
 
 

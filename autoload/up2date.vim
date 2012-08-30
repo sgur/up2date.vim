@@ -35,6 +35,7 @@ function! up2date#update(src)
     return
   endif
   let is_update = s:update_all(source)
+  call up2date#worker#wait_until(0)
   call s:cycle_filetype(is_update)
 endfunction
 
@@ -47,6 +48,7 @@ function! up2date#update_bundle(bundle)
     return
   endif
   let is_update = s:update_one(source, a:bundle)
+  call up2date#worker#wait_until(0)
   call s:cycle_filetype(is_update)
 endfunction
 
