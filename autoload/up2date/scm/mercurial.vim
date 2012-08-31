@@ -41,19 +41,20 @@ function! s:pull(temp_name) dict
     call system(join([s:exec(), 'pull', '--update']))
     let changes = system(join([s:exec(), 'log', '--rev', rev.'..tip',
           \ '--template ''{node|short} {desc|strip|firstline}\n''']))
+    echohl Title
     echomsg 'update[mercurial]' '->' self.cwd
+    echohl None
     for c in changes
       echomsg c
     endfor
-    echomsg 'done'
   else
-    echomsg 'update[mercurial]' '->' self.cwd '(no update)'
+    echo 'update[mercurial]' '->' self.cwd '(no update)'
   endif
 endfunction
 
 
 function! s:clone(temp_name) dict
-  echomsg 'checkout[mercurial]' '->' self.cwd 'done'
+  echomsg 'checkout[mercurial]' '->' self.cwd
 endfunction
 
 

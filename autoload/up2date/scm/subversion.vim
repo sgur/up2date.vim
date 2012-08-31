@@ -37,19 +37,20 @@ let s:SID = s:SID_PREFIX()
 function! s:update(temp_name) dict
   let lines = split(readfile(a:temp_name))
   if !empty(lines)
+    echohl Title
     echomsg 'update[subversion]' '->' self.cwd
+    echohl None
     for l in lines
       echo lines
     endfor
-    echomsg 'done'
   else
-    echomsg 'update[subversion]' '->' self.cwd '(no update)'
+    echo 'update[subversion]' '->' self.cwd '(no update)'
   endif
 endfunction
 
 
 function! s:checkout(temp_name) dict
-  echomsg 'checkout[subversion]' '->' self.cwd 'done'
+  echomsg 'checkout[subversion]' '->' self.cwd
 endfunction
 
 

@@ -45,13 +45,14 @@ function! s:rebase(temp_name) dict
     call system(join([s:exec(), 'rebase', '-f', 'origin']))
     let changes = split(system(join([s:exec(), 'log', '--oneline', hash.'..HEAD'])),
           \ '\r\n\|\n\|\r')
+    echohl Title
     echomsg 'update[git]' '->' self.cwd
+    echohl None
     for c in changes
       echomsg c
     endfor
-    echomsg 'done'
   else
-    echomsg 'update[git]' '->' self.cwd '(no update)'
+    echo 'update[git]' '->' self.cwd '(no update)'
   endif
 endfunction
 
@@ -61,7 +62,7 @@ function! s:checkout(temp_name) dict
     lcd `=self.cwd`
     echo system(join([s:exec(), 'checkout', self.rev]))
   endif
-  echomsg 'checkout[git]' '->' self.cwd 'done'
+  echomsg 'checkout[git]' '->' self.cwd
 endfunction
 
 
