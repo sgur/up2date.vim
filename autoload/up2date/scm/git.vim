@@ -62,7 +62,9 @@ function! s:checkout(temp_name) dict
     lcd `=self.cwd`
     echo system(join([s:exec(), 'checkout', self.rev]))
   endif
+  echohl Title
   echomsg 'checkout[git]' '->' self.cwd
+  echohl None
 endfunction
 
 

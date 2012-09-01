@@ -54,7 +54,9 @@ endfunction
 
 
 function! s:clone(temp_name) dict
+  echohl Title
   echomsg 'checkout[mercurial]' '->' self.cwd
+  echohl None
 endfunction
 
 

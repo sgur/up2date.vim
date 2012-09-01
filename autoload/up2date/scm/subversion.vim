@@ -50,7 +50,9 @@ endfunction
 
 
 function! s:checkout(temp_name) dict
+  echohl Title
   echomsg 'checkout[subversion]' '->' self.cwd
+  echohl None
 endfunction
 
 
