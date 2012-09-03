@@ -27,9 +27,10 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 
-" `:Up2date [<source_file>]`
-function! up2date#update(src)
-  let source = s:select_source(a:src)
+
+" `:Up2date [<bundle_name>]`
+function! up2date#update(bundle)
+  let source = s:select_source()
   if !filereadable(source)
     echoerr 'up2date: source file not found!'
     return
@@ -37,28 +38,11 @@ function! up2date#update(src)
   let more = &more
   set nomore
   try
-    let is_update = s:update_all(source)
-  catch
-    let is_update = 0
-  finally
-    let &more = more
-    call up2date#worker#wait_until(0)
-  endtry
-  call s:cycle_filetype(is_update)
-endfunction
-
-
-" `:Up2dateBundle <bundle_name>`
-function! up2date#update_bundle(bundle)
-  let source = s:select_source('')
-  if !filereadable(source)
-    echoerr 'up2date: source file not found!'
-    return
-  endif
-  let more = &more
-  set nomore
-  try
-    let is_update = s:update_one(source, a:bundle)
+    if empty(a:bundle)
+      let is_update = s:update_all(source)
+    else
+      let is_update = s:update_one(source, a:bundle)
+    endif
   catch
     let is_update = 0
   finally
@@ -71,7 +55,7 @@ endfunction
 
 " Complete helper funcition for `:Up2dateBundle`
 function! up2date#complete(arglead, cmdline, cursorpos)
-  let source = s:select_source('')
+  let source = s:select_source()
   if !filereadable(source)
     return []
   endif
@@ -80,8 +64,8 @@ function! up2date#complete(arglead, cmdline, cursorpos)
 endfunction
 
 
-function! up2date#status(src)
-  let source = s:select_source(a:src)
+function! up2date#status()
+  let source = s:select_source()
   if !filereadable(source)
     echoerr 'up2date: source file not found!'
     return
@@ -103,8 +87,8 @@ function! up2date#update_line()
 endfunction
 
 
-function! up2date#start_bg(src)
-  let source = s:select_source(a:src)
+function! up2date#start_bg(bundle)
+  let source = s:select_source()
   if !filereadable(source)
     echoerr 'up2date: source file not found!'
     return
@@ -153,10 +137,8 @@ function! s:cycle_filetype(is_update)
 endfunction
 
 
-function! s:select_source(src)
-  return empty(a:src)
-        \ ? expand(get(g:, 'up2date_source_path', s:default_source_path('~/')))
-        \ : (filereadable(expand(a:src)) ? expand(a:src) : '')
+function! s:select_source()
+  return expand(get(g:, 'up2date_source_path', s:default_source_path('~/')))
 endfunction
 
 

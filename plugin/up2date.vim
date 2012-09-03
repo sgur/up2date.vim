@@ -28,11 +28,8 @@ if exists('g:loaded_up2date') && g:loaded_up2date
 endif
 let g:loaded_up2date = 1
 
-command! -nargs=? -complete=file Up2date
+command! -nargs=? -complete=customlist,up2date#complete Up2date
       \ call up2date#update(<q-args>)
-
-command! -nargs=1 -complete=customlist,up2date#complete Up2dateBundle
-      \ call up2date#update_bundle(<q-args>)
 
 command! -nargs=0 Up2dateAtCursor call up2date#update_line()
 
