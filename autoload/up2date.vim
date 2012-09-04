@@ -29,7 +29,7 @@ set cpo&vim
 
 
 " `:Up2date [<bundle_name>]`
-function! up2date#update(bundle)
+function! up2date#update(...)
   let source = s:select_source()
   if !filereadable(source)
     echoerr 'up2date: source file not found!'
@@ -38,16 +38,14 @@ function! up2date#update(bundle)
   let more = &more
   set nomore
   try
-    if empty(a:bundle)
-      let is_update = s:update_all(source)
-    else
-      let is_update = s:update_one(source, a:bundle)
-    endif
+    let is_update = (a:0)
+          \ ? s:update_specified(source, a:000)
+          \ : s:update_all(source)
   catch
     let is_update = 0
   finally
-    let &more = more
     call up2date#worker#wait_until(0)
+    let &more = more
   endtry
   call s:cycle_filetype(is_update)
 endfunction
@@ -201,9 +199,9 @@ function! s:update_all(file)
 endfunction
 
 
-function! s:update_one(file, bundle)
+function! s:update_specified(file, bundles)
   let newplugins =
-        \ filter(map(filter(s:collect_repos(a:file), 'v:val.target == a:bundle'),
+        \ filter(map(filter(s:collect_repos(a:file), 'index(a:bundles, v:val.target) >= 0'),
         \ 's:process(v:val)'),
         \ 'v:val')
   return len(newplugins)
