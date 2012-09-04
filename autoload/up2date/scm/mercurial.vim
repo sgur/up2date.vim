@@ -38,12 +38,13 @@ function! s:pull(temp_name) dict
   if getfsize(a:temp_name) > 0
     lcd `=self.cwd`
     let rev = system(join([s:exec(), 'log', '--template ''{rev}''', '-l 1']))
-    call system(join([s:exec(), 'pull', '--update']))
+    let msg = system(join([s:exec(), 'pull', '--update']))
     let changes = system(join([s:exec(), 'log', '--rev', rev.'..tip',
           \ '--template ''{node|short} {desc|strip|firstline}\n''']))
     echohl Title
     echomsg 'update[mercurial]' '->' self.cwd
     echohl None
+    echo msg
     for c in changes
       echomsg c
     endfor
