@@ -28,7 +28,7 @@ set cpo&vim
 
 
 function! up2date#line#extract(line)
-  let matches = matchlist(a:line, 'BUNDLE:\s*\(.\+\)$')
+  let matches = matchlist(a:line, '\<BUNDLE:\s*\(.\+\)$')
   return empty(matches) ? '' : matches[1]
 endfunction
 
