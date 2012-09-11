@@ -38,17 +38,17 @@ endfunction
 let s:SID = s:SID_PREFIX()
 
 
-function! s:rebase(temp_name) dict
-  if getfsize(a:temp_name) > 0
+function! s:pull(temp_name) dict
+  let status = readfile(a:temp_name)
+  if !empty(status) && stridx(status[0], 'up to date') == -1
     lcd `=self.cwd`
-    let hash = split(system(join([s:exec(), 'log', '--oneline', '-1', '--format=%h'])))[0]
-    let msg = system(join([s:exec(), 'rebase', '-q', 'origin']))
-    let changes = split(system(join([s:exec(), 'log', '--oneline', hash.'..HEAD','--'])),
+    let changes = split(
+          \ system(join([s:exec(), 'log', '--oneline', self.hash.'..HEAD','--'])),
           \ '\r\n\|\n\|\r')
     echohl Title
     echomsg 'update[git]' '->' self.cwd
     echohl None
-    echo msg
+    echo status
     for c in changes
       echomsg c
     endfor
@@ -76,10 +76,12 @@ function! up2date#scm#git#update(branch, revision)
   if !empty(a:revision)
     call system(join([s:exec(), 'checkout', a:revision]))
   else
-    let cmd = join([s:exec(), 'fetch'])
+    let hash = split(system(join([s:exec(), 'log', '--oneline', '-1', '--format=%h'])))[0]
+    let cmd = join([s:exec(), 'pull', '--rebase'])
     let env = {
-          \ 'cwd' : getcwd(),
-          \ 'get' : function(s:SID.'rebase'),
+          \ 'cwd'  : getcwd(),
+          \ 'get'  : function(s:SID.'pull'),
+          \ 'hash' : hash,
           \ }
     call up2date#worker#asynccommand(cmd, env)
   endif
@@ -93,7 +95,6 @@ function! up2date#scm#git#checkout(url, branch, revision, target)
         \ 'cwd' : expand(getcwd().'/'.a:target),
         \ 'rev' : a:revision,
         \ 'get' : function(s:SID.'checkout'),
-        \ 'is_checkout' : 1,
         \ }
   call up2date#worker#asynccommand(cmd, env)
 endfunction
