@@ -44,7 +44,9 @@ function! up2date#update(...)
   catch
     let is_update = 0
   finally
-    call up2date#worker#wait_until(0)
+    if !a:0
+      call up2date#worker#wait_until(0)
+    endif
     let &more = more
   endtry
   call s:cycle_filetype(is_update)
