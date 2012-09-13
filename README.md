@@ -11,18 +11,19 @@ up2date は vim のプラグインを管理するためのプラグインです�
 特徴
 ----
 
- - .vimrc のコメントとしてプラグインのURLを書いておくと自動で認識
- - ブランチ、リビジョン、チェックアウトディレクトリなどを指定可能
+ - 更新対象の指定は .vimrc のコメントとしてプラグインのURLを記述
+ - URL から使用する バージョン管理システムを推測
+ - オプションでブランチ、リビジョン、チェックアウトディレクトリなどを指定可能
  - git, mercurial, subversion に対応
- - AsyncCommand を利用することで、並列にアップデートが可能
+ - [AsyncCommand](https://github.com/pydave/AsyncCommand) を利用することで、並列にアップデートが可能
 
 使い方
 ------
 
 `~/.vimrc` (`g:up2date_source_path` で変更可能) に記述された
 `BUNDLE: <URL>` で始まる行を書きます。
-コマンドではないので、コメントアウトしておかないと Vim がロードした際にエラー
-となるのでご注意ください。
+コマンドではないので、コメントアウトしておかないと
+Vim がロードした際にエラーとなるのでご注意ください。
 
     " BUNDLE: https://github.com/sgur/up2date.vim.git
 
@@ -52,11 +53,11 @@ Asynccommand がインストールされている場合、
 
 ### `:Up2dateStatus`
 
-`~/.vim/bundle` 以下のプラグインのうち、以下のものをリストアップします。
+`~/.vim/bundle` 以下のプラグインのうち、以下のものを表示します。
 
- - `~/.vimrc` に `BUNDLE: ...` が記述されているが、
+ - Uninstalled: `~/.vimrc` に `BUNDLE: ...` が記述されているが、
    実際にはインストールされていないもの
- - `~/.vim/bundle` 以下にインストールされているが、
+ - Unlisted: `~/.vim/bundle` 以下にプラグインが存在するが、
    `~/.vimrc` に `BUNDLE: ...` の記述がないもの
 
 オプション
@@ -68,6 +69,8 @@ Asynccommand がインストールされている場合、
     " BUNDLE: https://github.com/sgur/up2date.vim.git
 
 また、上記 `BUNDLE:` 行へ指定できるオプションとしては以下のものがあります。
+
+使用されるバージョン管理システムによっては指定しても無効となるものがあります。
 
 ### チェックアウト対象のリビジョンの指定
 
