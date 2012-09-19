@@ -152,7 +152,7 @@ endfunction
 
 
 function! s:process(repo)
-  if empty(a:repo.target) || a:repo.scm == 'unknown'
+  if empty(a:repo.target) || a:repo.scm ==# 'unknown'
     echoerr 'Invalid "BUNDLE:" line:' a:repo.line
     return
   endif
@@ -174,7 +174,7 @@ function! s:scm_cmd(cmd, repo, dir)
   let owd = getcwd()
   lcd `=a:dir`
   try
-    if a:cmd == 'update'
+    if a:cmd ==# 'update'
       call up2date#scm#{a:repo.scm}#update(a:repo.branch, a:repo.revision)
     else
       call up2date#scm#{a:repo.scm}#checkout(a:repo.url, a:repo.branch, a:repo.revision, a:repo.target)
