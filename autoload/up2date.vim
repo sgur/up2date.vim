@@ -38,6 +38,7 @@ function! up2date#update(...)
   let more = &more
   set nomore
   try
+    redir => s:update_log
     let is_update = (a:0)
           \ ? s:update_specified(source, a:000)
           \ : s:update_all(source)
@@ -48,6 +49,7 @@ function! up2date#update(...)
       call up2date#worker#wait_until(0)
     endif
     let &more = more
+    redir END
   endtry
   call s:cycle_filetype(is_update)
 endfunction
@@ -115,10 +117,21 @@ function! up2date#cancel_bg()
 endfunction
 
 
+function! up2date#log()
+  redraw
+  echo join(filter(split(s:update_log, '\n'), 'match(v:val, "^:!") == -1'), "\n")
+endfunction
+
+
+
 " Vim user directory
 let s:vim_user_dir = expand((has('win32') || has('win64'))
       \ ? '~/vimfiles/' : '~/.vim/')
 
+
+if !exists('s:update_log')
+  let s:update_log = ''
+endif
 
 " Bundle directory
 function! s:bundle_dir()

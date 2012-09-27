@@ -48,7 +48,9 @@ function! s:pull(temp_name) dict
     echohl Title
     echomsg 'update[git]' '->' self.cwd
     echohl None
-    echo status
+    for s in split(status, '\n')
+      echo '>' s
+    endfor
     for c in changes
       echomsg c
     endfor
