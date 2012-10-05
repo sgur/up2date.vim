@@ -63,6 +63,7 @@ function! up2date#worker#asynccommand(cmd, env)
       endif
     endfunction
     call asynccommand#run(a:cmd, env)
+    sleep 1 
   else
     let output = system(a:cmd)
     let tempfile = tempname()

@@ -57,6 +57,7 @@ function! s:pull(temp_name) dict
   else
     echo 'update[git]' '->' self.cwd '(no update)'
   endif
+  call up2date#start()
 endfunction
 
 
@@ -68,6 +69,7 @@ function! s:checkout(temp_name) dict
   echohl Title
   echomsg 'checkout[git]' '->' self.cwd
   echohl None
+  call up2date#start()
 endfunction
 
 

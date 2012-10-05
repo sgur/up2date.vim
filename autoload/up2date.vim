@@ -35,23 +35,12 @@ function! up2date#update(...)
     echoerr 'up2date: source file not found!'
     return
   endif
-  let more = &more
-  set nomore
-  try
-    redir => s:update_log
-    let is_update = (a:0)
-          \ ? s:update_specified(source, a:000)
-          \ : s:update_all(source)
-  catch
-    let is_update = 0
-  finally
-    if !a:0
-      call up2date#worker#wait_until(0)
-    endif
-    let &more = more
-    redir END
-  endtry
-  call s:cycle_filetype(is_update)
+  let s:repos = s:collect_repos(source) 
+  if a:0
+    let s:repos = filter(s:repos, 'index(a:000, v:val.target) >= 0')
+  endif
+  call s:setup()
+  call up2date#start()
 endfunction
 
 
@@ -76,7 +65,7 @@ function! up2date#status()
 endfunction
 
 
-" :Up2dateLine
+" :Up2dateAtCursor
 function! up2date#update_line()
   let line = up2date#line#extract(getline('.'))
   if empty(line)
@@ -88,32 +77,28 @@ function! up2date#update_line()
   call s:process(repo)
 endfunction
 
-
-function! up2date#start_bg(bundle)
-  let source = s:select_source()
-  if !filereadable(source)
-    echoerr 'up2date: source file not found!'
-    return
-  endif
-  let s:plugins = s:collect_repos(source)
-  if !exists('g:up2date_workers_max')
-    let g:up2date_workers_max = 1
-    let s:is_override = 1
-  endif
-  augroup up2date_background
-    autocmd!
-    autocmd CursorHold,CursorHoldI * call s:on_cursor_hold(s:plugins)
-  augroup END
+function! up2date#start()
+  let more = &more
+  set nomore
+  redir ==> s:update_log
+  try 
+    if exists('s:repos') 
+      if !empty(s:repos)
+        let repo = s:repos[0]
+        let s:newplugins = s:process(repo) ? 1 : s:newplugins
+        call remove(s:repos, 0)
+      else
+        call s:teardown()
+      endif
+    endif
+  finally
+    redir END
+    let &more = more
+  endtry
 endfunction
 
-
-function! up2date#cancel_bg()
-  let s:plugins = []
-  if exists('s:is_override')
-    unlet g:up2date_workers_max
-    unlet s:is_override
-  endif
-  autocmd! up2date_background
+function! up2date#cancel()
+  let s:repos = []
 endfunction
 
 
@@ -205,24 +190,6 @@ function! s:collect_repos(file)
 endfunction
 
 
-function! s:update_all(file)
-  let newplugins = 
-        \ filter(map(s:collect_repos(a:file),
-        \ 's:process(v:val)'),
-        \ 'v:val')
-  return len(newplugins)
-endfunction
-
-
-function! s:update_specified(file, bundles)
-  let newplugins =
-        \ filter(map(filter(s:collect_repos(a:file), 'index(a:bundles, v:val.target) >= 0'),
-        \ 's:process(v:val)'),
-        \ 'v:val')
-  return len(newplugins)
-endfunction
-
-
 function! s:diff_bundles(file)
   let bundles = map(filter(s:collect_repos(a:file),
         \ '!empty(v:val)'),
@@ -255,6 +222,18 @@ function! s:on_cursor_hold(bundles)
     call feedkeys("a\<BS>",'n')
   endif
 endfunction
+
+
+function! s:setup()
+  let s:newplugins = 0
+  let s:update_log = ''
+endfunction
+
+function! s:teardown()
+  call up2date#worker#wait_until(0)
+  call s:cycle_filetype(s:newplugins)
+endfunction
+
 
 
 " vspec helper functions. see vspec#hint() {{{
