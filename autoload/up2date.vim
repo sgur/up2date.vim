@@ -80,7 +80,7 @@ endfunction
 function! up2date#start()
   let more = &more
   set nomore
-  redir ==> s:update_log
+  redir =>> s:update_log
   try 
     if exists('s:repos') 
       if !empty(s:repos)
