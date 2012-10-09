@@ -77,13 +77,19 @@ endfunction
 
 
 function! s:scm_from_line(line)
+  let matches = matchlist(a:line, '^http\(s\)\?://github\.com.\+/\zs[^/]\+\ze\(\.git\)\?$')
+  if !empty(matches)
+    return {'scm' : 'git',
+          \ 'dir' : matches[0],
+          \ 'url' : a:line }
+  endif
   let matches = matchlist(a:line, '^\(https:\|git[@:]\).\+/\zs[^/]\+\ze\.git$')
   if !empty(matches)
     return {'scm' : 'git',
           \ 'dir' : matches[0],
           \ 'url' : a:line }
   endif
-  let matches = matchlist(a:line, '\(https\|ssh\)://bitbucket.org.\+/\zs[^/]\+$')
+  let matches = matchlist(a:line, '\(https\|ssh\)://bitbucket\.org.\+/\zs[^/]\+$')
   if !empty(matches)
     return {'scm' : 'mercurial',
           \ 'dir' : matches[0],

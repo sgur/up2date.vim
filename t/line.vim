@@ -52,6 +52,8 @@ describe 'Option parsing module'
           \ ==# 'subversion'
     Expect Call('s:parse_options', 'http://vim-soko.googlecode.com/svn/trunk/autofmt/').scm
           \ ==# ''
+    Expect Call('s:scm_from_line', 'https://github.com/Shougo/neocomplcache').scm
+          \ ==# 'git'
   end
 
 end
