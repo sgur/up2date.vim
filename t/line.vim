@@ -28,6 +28,10 @@ describe 'Option parsing module'
   it 'should detect scm type'
     Expect Call('s:scm_from_line', 'git://github.com/Shougo/neocomplcache.git').scm
           \ ==# 'git'
+    Expect Call('s:scm_from_line', 'https://github.com/Shougo/neocomplcache.git').dir
+          \ ==# 'neocomplcache'
+    Expect Call('s:scm_from_line', 'https://github.com/Shougo/neocomplcache').scm
+          \ ==# 'git'
     Expect Call('s:scm_from_line', 'git@github.com:Shougo/neocomplcache.git').scm
           \ ==# 'git'
     Expect Call('s:scm_from_line', 'https://github.com/Shougo/neocomplcache.git').scm
@@ -52,8 +56,6 @@ describe 'Option parsing module'
           \ ==# 'subversion'
     Expect Call('s:parse_options', 'http://vim-soko.googlecode.com/svn/trunk/autofmt/').scm
           \ ==# ''
-    Expect Call('s:scm_from_line', 'https://github.com/Shougo/neocomplcache').scm
-          \ ==# 'git'
   end
 
 end
