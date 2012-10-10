@@ -37,3 +37,12 @@ function! up2date#util#add_runtimepath(dir)
     let &runtimepath .= ','.afterdir
   endif
 endfunction
+
+
+function! up2date#util#helptags(dir)
+  let doc_dir = expand(a:dir.'/doc')
+  if isdirectory(doc_dir) && !findfile('tags', doc_dir)
+    execute 'helptags' doc_dir
+  endif
+endfunction
+

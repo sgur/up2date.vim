@@ -48,6 +48,7 @@ function! up2date#worker#is_full()
   return s:workers >= limit ? 1 : 0
 endfunction
 
+
 function! up2date#worker#wait_until(count) abort
   while s:workers > a:count
     execute 'sleep' s:workers_wait.'m'
@@ -69,6 +70,7 @@ function! up2date#worker#asynccommand(cmd, env)
       if exists('self.is_checkout') && self.is_checkout
         call up2date#util#source_plugin(self.cwd)
         call up2date#util#add_runtimepath(self.cwd)
+        call up2date#util#helptags(self.cwd)
       endif
     endfunction
     call asynccommand#run(a:cmd, env)
