@@ -41,6 +41,7 @@ function! up2date#update(...)
   endif
   call s:setup()
   call up2date#start()
+  call s:teardown()
 endfunction
 
 
@@ -82,14 +83,12 @@ function! up2date#start()
   set nomore
   redir =>> s:update_log
   try 
-    if exists('s:repos') 
-      if !empty(s:repos)
+    if exists('s:repos') && !empty(s:repos)
+      while !up2date#worker#is_full()
         let repo = s:repos[0]
+        let s:repos = s:repos[1:]
         let s:newplugins = s:process(repo) ? 1 : s:newplugins
-        call remove(s:repos, 0)
-      else
-        call s:teardown()
-      endif
+      endwhile
     endif
   finally
     redir END

@@ -46,7 +46,6 @@ function! s:update(temp_name) dict
   else
     echo 'update[subversion]' '->' self.cwd '(no update)'
   endif
-  call up2date#start()
 endfunction
 
 
@@ -54,7 +53,6 @@ function! s:checkout(temp_name) dict
   echohl Title
   echomsg 'checkout[subversion]' '->' self.cwd
   echohl None
-  call up2date#start()
 endfunction
 
 

@@ -39,6 +39,14 @@ function! s:decrement_worker()
   let s:workers -= 1
 endfunction
 
+function! s:get_limit()
+  return get(g:, 'up2date_max_workers', s:default_max_workers)
+endfunction
+
+function! up2date#worker#is_full()
+  let limit = s:get_limit()
+  return s:workers >= limit ? 1 : 0
+endfunction
 
 function! up2date#worker#wait_until(count) abort
   while s:workers > a:count
@@ -48,13 +56,14 @@ endfunction
 
 
 function! up2date#worker#asynccommand(cmd, env)
-  call up2date#worker#wait_until(get(g:, 'up2date_max_workers', s:default_max_workers)-1)
+  call up2date#worker#wait_until(s:get_limit() - 1)
   if exists('g:loaded_asynccommand')
     call s:increment_worker()
     let env = a:env
     let env.callback = a:env.get
     function! env.get(temp_name) dict
       echomsg self.callback
+      call up2date#start()
       call self.callback(a:temp_name)
       call s:decrement_worker()
       if exists('self.is_checkout') && self.is_checkout
@@ -63,7 +72,6 @@ function! up2date#worker#asynccommand(cmd, env)
       endif
     endfunction
     call asynccommand#run(a:cmd, env)
-    sleep 1 
   else
     let output = system(a:cmd)
     let tempfile = tempname()

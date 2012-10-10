@@ -51,7 +51,6 @@ function! s:pull(temp_name) dict
   else
     echo 'update[mercurial]' '->' self.cwd '(no update)'
   endif
-  call up2date#start()
 endfunction
 
 
@@ -59,7 +58,6 @@ function! s:clone(temp_name) dict
   echohl Title
   echomsg 'checkout[mercurial]' '->' self.cwd
   echohl None
-  call up2date#start()
 endfunction
 
 
