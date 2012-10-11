@@ -41,7 +41,6 @@ function! up2date#update(...)
   endif
   call s:setup()
   call up2date#start()
-  call s:teardown()
 endfunction
 
 
@@ -78,15 +77,17 @@ function! up2date#update_line()
   call s:process(repo)
 endfunction
 
+
 function! up2date#start()
   let more = &more
   set nomore
   redir =>> s:update_log
   try 
-    if exists('s:repos') && !empty(s:repos)
-      while !up2date#worker#is_full()
-        let repo = s:repos[0]
-        let s:repos = s:repos[1:]
+    if empty(s:repos)
+      call s:teardown()
+    else
+      while !empty(s:repos) && !up2date#worker#is_full()
+        let [repo, s:repos] = [s:repos[0], s:repos[1:]]
         let s:newplugins = s:process(repo) ? 1 : s:newplugins
       endwhile
     endif
@@ -95,6 +96,7 @@ function! up2date#start()
     let &more = more
   endtry
 endfunction
+
 
 function! up2date#cancel()
   let s:repos = []
@@ -116,6 +118,12 @@ let s:vim_user_dir = expand((has('win32') || has('win64'))
 if !exists('s:update_log')
   let s:update_log = ''
 endif
+
+
+" Repositories to update
+let s:repos = []
+
+
 
 " Bundle directory
 function! s:bundle_dir()
@@ -229,7 +237,6 @@ function! s:setup()
 endfunction
 
 function! s:teardown()
-  call up2date#worker#wait_until(0)
   call s:cycle_filetype(s:newplugins)
 endfunction
 
