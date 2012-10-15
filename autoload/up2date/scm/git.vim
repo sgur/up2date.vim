@@ -45,15 +45,15 @@ function! s:pull(temp_name) dict
     let changes = split(
           \ system(join([s:exec(), 'log', '--oneline', self.hash.'..HEAD','--'])),
           \ '\r\n\|\n\|\r')
-    echohl Title
-    echomsg 'update[git]' '->' self.cwd
-    echohl None
+    let msg = []
+    call add(msg, 'update[git] -> '.self.cwd)
     for s in split(status, '\n')
-      echo '>' s
+      call add(msg, '> '.s)
     endfor
     for c in changes
-      echomsg c
+      call add(msg, c)
     endfor
+    call up2date#log#log(fnamemodify(self.cwd, ':t'), msg)
   else
     echo 'update[git]' '->' self.cwd '(no update)'
   endif
@@ -65,9 +65,8 @@ function! s:checkout(temp_name) dict
     lcd `=self.cwd`
     echo system(join([s:exec(), 'checkout', self.rev]))
   endif
-  echohl Title
-  echomsg 'checkout[git]' '->' self.cwd
-  echohl None
+  let msg = ['checkout[git] -> '.self.cwd]
+  call up2date#log#log(fnamemodify(self.cwd, ':t'), msg)
 endfunction
 
 
