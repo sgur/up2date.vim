@@ -81,7 +81,6 @@ endfunction
 function! up2date#start()
   let more = &more
   set nomore
-  redir =>> s:update_log
   try 
     if empty(s:repos)
       call s:teardown()
@@ -92,7 +91,6 @@ function! up2date#start()
       endwhile
     endif
   finally
-    redir END
     let &more = more
   endtry
 endfunction
@@ -103,21 +101,10 @@ function! up2date#cancel()
 endfunction
 
 
-function! up2date#log()
-  redraw
-  echo join(filter(split(s:update_log, '\n'), 'match(v:val, "^:!") == -1'), "\n")
-endfunction
-
-
 
 " Vim user directory
 let s:vim_user_dir = expand((has('win32') || has('win64'))
       \ ? '~/vimfiles/' : '~/.vim/')
-
-
-if !exists('s:update_log')
-  let s:update_log = ''
-endif
 
 
 " Repositories to update
@@ -233,7 +220,6 @@ endfunction
 
 function! s:setup()
   let s:newplugins = 0
-  let s:update_log = ''
 endfunction
 
 function! s:teardown()
