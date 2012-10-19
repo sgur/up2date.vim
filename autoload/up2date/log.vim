@@ -27,8 +27,8 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 function! up2date#log#log(title, lines)
-  let bufname = '__'.a:title.'__'
-  execute 'keepalt botright pedit' bufname
+  let bufname = '__UP2DATE__'
+  execute 'silent pedit' bufname
   let winnr = bufwinnr(bufname)
   execute winnr.'wincmd w'
   set buftype=nofile bufhidden=wipe noswapfile
@@ -37,7 +37,10 @@ function! up2date#log#log(title, lines)
     call append(line('$'), l)
   endfor
   1
-  execute 'resize' len(a:lines)+2
+  let cols = len(a:lines)+2
+  if cols < &previewheight
+    execute 'resize' cols
+  endif
 endfunction
 
 let &cpo = s:save_cpo
