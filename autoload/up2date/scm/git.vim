@@ -55,7 +55,8 @@ function! s:pull(temp_name) dict
     endfor
     call up2date#log#log(fnamemodify(self.cwd, ':t'), msg)
   else
-    echo 'update[git]' '->' self.cwd '(no update)'
+    call up2date#log#log(fnamemodify(self.cwd, ':t'),
+          \ 'update[git] -> '.self.cwd.' (no update)')
   endif
 endfunction
 
