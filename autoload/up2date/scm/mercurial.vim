@@ -38,16 +38,18 @@ function! s:pull(temp_name) dict
   if getfsize(a:temp_name) > 0
     lcd `=self.cwd`
     let rev = system(join([s:exec(), 'log', '--template ''{rev}''', '-l 1']))
-    let msg = system(join([s:exec(), 'pull', '--update']))
+    let status = system(join([s:exec(), 'pull', '--update']))
     let changes = system(join([s:exec(), 'log', '--rev', rev.'..tip',
           \ '--template ''{node|short} {desc|strip|firstline}\n''']))
-    echohl Title
-    echomsg 'update[mercurial]' '->' self.cwd
-    echohl None
-    echo msg
-    for c in changes
-      echomsg c
+    let msg = []
+    call add(msg, 'update[mercurial]' '->' self.cwd) 
+    for s in split(status, '\n')
+      call add(msg, '> '.s)
     endfor
+    for c in changes
+      call add(msg, c)
+    endfor
+    call up2date#log#log(fnamemodify(self.cwd, ':t'), msg)
   else
     echo 'update[mercurial]' '->' self.cwd '(no update)'
   endif
@@ -55,9 +57,8 @@ endfunction
 
 
 function! s:clone(temp_name) dict
-  echohl Title
-  echomsg 'checkout[mercurial]' '->' self.cwd
-  echohl None
+  let msg = ['checkout[mercurial] -> '.self.cwd]
+  call up2date#log#log(fnamemodify(self.cwd, ':t'), msg)
 endfunction
 
 

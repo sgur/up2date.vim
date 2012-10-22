@@ -37,12 +37,12 @@ let s:SID = s:SID_PREFIX()
 function! s:update(temp_name) dict
   let lines = split(readfile(a:temp_name))
   if !empty(lines)
-    echohl Title
-    echomsg 'update[subversion]' '->' self.cwd
-    echohl None
+    let msg = []
+    call add(msg, 'update[subversion]' '->' self.cwd)
     for l in lines
-      echo lines
+      call add(msg, '> '.l)
     endfor
+    call up2date#log#log(fnamemodify(self.cwd, ':t'), msg)
   else
     echo 'update[subversion]' '->' self.cwd '(no update)'
   endif
@@ -50,9 +50,8 @@ endfunction
 
 
 function! s:checkout(temp_name) dict
-  echohl Title
-  echomsg 'checkout[subversion]' '->' self.cwd
-  echohl None
+  let msg = ['checkout[subversion]' '->' self.cwd]
+  call up2date#log#log(fnamemodify(self.cwd, ':t'), msg)
 endfunction
 
 
