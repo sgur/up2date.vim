@@ -101,6 +101,15 @@ function! up2date#cancel()
 endfunction
 
 
+function! up2date#indicator(...)
+  let format = get(a:, '1', 'Up2date:{%num}')
+  let format = substitute(format, '{%num}', len(s:repos), 'g')
+  return len(s:repos)
+        \ ? '['.format.']'
+        \ : ''
+endfunction
+
+
 
 " Vim user directory
 let s:vim_user_dir = expand((has('win32') || has('win64'))
