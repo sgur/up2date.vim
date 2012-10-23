@@ -31,7 +31,7 @@ function! up2date#log#log(title, lines)
   execute 'silent pedit' bufname
   let winnr = bufwinnr(bufname)
   execute winnr.'wincmd w'
-  set buftype=nofile bufhidden=wipe noswapfile
+  setlocal buftype=nofile bufhidden=wipe noswapfile nowrap
   call append(0, a:title)
   for l in a:lines
     call append(line('$'), l)
