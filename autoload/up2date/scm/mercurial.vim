@@ -42,16 +42,13 @@ function! s:pull(temp_name) dict
     let changes = system(join([s:exec(), 'log', '--rev', rev.'..tip',
           \ '--template ''{node|short} {desc|strip|firstline}\n''']))
     let msg = []
-    call add(msg, 'update[mercurial]' '->' self.cwd) 
     for s in split(status, '\n')
       call add(msg, '> '.s)
     endfor
     for c in changes
       call add(msg, c)
     endfor
-    call up2date#log#log(fnamemodify(self.cwd, ':t'), msg)
-  else
-    echo 'update[mercurial]' '->' self.cwd '(no update)'
+    call up2date#log#log('update[mercurial]' '->' self.cwd, msg)
   endif
 endfunction
 

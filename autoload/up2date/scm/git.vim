@@ -46,16 +46,13 @@ function! s:pull(temp_name) dict
           \ system(join([s:exec(), 'log', '--oneline', self.hash.'..HEAD','--'])),
           \ '\r\n\|\n\|\r')
     let msg = []
-    call add(msg, 'update[git] -> '.self.cwd)
     for s in split(status, '\n')
       call add(msg, '> '.s)
     endfor
     for c in changes
       call add(msg, c)
     endfor
-    call up2date#log#log(fnamemodify(self.cwd, ':t'), msg)
-  else
-    echomsg 'update[git] -> '.self.cwd.' (no update)')
+    call up2date#log#log('update[git] -> '.self.cwd, msg)
   endif
 endfunction
 

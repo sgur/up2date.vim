@@ -38,13 +38,10 @@ function! s:update(temp_name) dict
   let lines = split(readfile(a:temp_name))
   if !empty(lines)
     let msg = []
-    call add(msg, 'update[subversion]' '->' self.cwd)
     for l in lines
       call add(msg, '> '.l)
     endfor
-    call up2date#log#log(fnamemodify(self.cwd, ':t'), msg)
-  else
-    echo 'update[subversion]' '->' self.cwd '(no update)'
+    call up2date#log#log('update[subversion]' '->' self.cwd, msg)
   endif
 endfunction
 
