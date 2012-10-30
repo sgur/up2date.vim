@@ -27,10 +27,10 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 function! up2date#log#log(title, lines)
+  let curnr = bufwinnr('%')
   let bufname = '__UP2DATE__'
   execute 'silent topleft pedit' bufname
-  let winnr = bufwinnr(bufname)
-  execute winnr.'wincmd w'
+  execute bufwinnr(bufname).'wincmd w'
   setlocal buftype=nofile bufhidden=wipe noswapfile nowrap
   call append(0, a:title)
   for l in a:lines
@@ -41,7 +41,8 @@ function! up2date#log#log(title, lines)
   if cols < &previewheight
     execute 'resize' cols
   endif
-  redraw!
+  redraw
+  execute curnr.'wincmd w'
 endfunction
 
 let &cpo = s:save_cpo
