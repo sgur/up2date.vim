@@ -43,7 +43,9 @@ function! s:pull(temp_name) dict
   if !empty(status) && stridx(status[0], 'up to date') == -1
     lcd `=self.cwd`
     let changes = split(
-          \ system(join([s:exec(), 'log', '--oneline', self.hash.'..HEAD','--'])),
+          \ system(join([s:exec(),
+          \ '--git-dir="'.expand(self.cwd.'/.git').'"',
+          \ 'log', '--oneline', self.hash.'..HEAD','--'])),
           \ '\r\n\|\n\|\r')
     let msg = []
     for s in split(status, '\n')
@@ -74,8 +76,13 @@ function! up2date#scm#git#update(branch, revision)
   if !empty(a:revision)
     call system(join([s:exec(), 'checkout', a:revision]))
   else
-    let hash = split(system(join([s:exec(), 'log', '--oneline', '-1', '--format=%h'])))[0]
-    let cmd = join([s:exec(), 'pull', '--rebase'])
+    let hash = split(system(join([s:exec(),
+          \ '--git-dir="'.expand(getcwd().'/.git').'"',
+          \ 'log', '--oneline', '-1', '--format=%h'])))[0]
+    let cmd = join([s:exec(),
+          \ '--git-dir="'.expand(getcwd().'/.git').'"',
+          \ '--work-tree="'.expand(getcwd()).'"',
+          \ 'pull', '--rebase'])
     let env = {
           \ 'cwd'  : getcwd(),
           \ 'get'  : function(s:SID.'pull'),
@@ -88,9 +95,10 @@ endfunction
 
 function! up2date#scm#git#checkout(url, branch, revision, target)
   let opt = !empty(a:branch) ? '--branch '.a:branch : ''
-  let cmd = join([s:exec(), 'clone', opt, a:url, a:target])
+  let cwd = expand(getcwd().'/'.a:target)
+  let cmd = join([s:exec(), 'clone', opt, a:url, cwd])
   let env = {
-        \ 'cwd' : expand(getcwd().'/'.a:target),
+        \ 'cwd' : cwd,
         \ 'rev' : a:revision,
         \ 'get' : function(s:SID.'checkout'),
         \ 'is_checkout' : 1,
