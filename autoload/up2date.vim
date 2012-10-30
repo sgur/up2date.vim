@@ -35,9 +35,14 @@ function! up2date#update(...)
     echoerr 'up2date: source file not found!'
     return
   endif
-  let s:repos = s:collect_repos(source) 
+  let repos = s:collect_repos(source)
   if a:0
-    let s:repos = filter(s:repos, 'index(a:000, v:val.target) >= 0')
+    let repos = filter(repos, 'index(a:000, v:val.target) >= 0')
+  endif
+  if empty(s:repos)
+    let s:repos = repos
+  else
+    call add(s:repos, repos)
   endif
   call s:setup()
   call up2date#start()
