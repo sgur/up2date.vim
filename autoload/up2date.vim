@@ -199,19 +199,17 @@ endfunction
 
 
 function! s:diff_bundles(file)
-  let bundles = map(filter(s:collect_repos(a:file),
-        \ '!empty(v:val)'),
-        \ 'v:val.target')
-  let installed = map(
-        \ split(globpath(s:bundle_dir(), '*')),
-        \ 'fnamemodify(v:val, ":t")'
+  let bundles = map(filter(s:collect_repos(a:file), '!empty(v:val)')
+        \ , 'v:val.target')
+  let exists = map(
+        \ split(globpath(s:bundle_dir(), '*'))
+        \ , 'fnamemodify(v:val, ":t")')
+  call up2date#log#log('status'
+        \ , ['## Ready to install']
+        \ + map(filter(copy(bundles), 'index(exists, v:val) == -1'), '"- ".v:val')
+        \ + ['', '## Unrecognized']
+        \ + map(filter(copy(exists), 'index(bundles, v:val) == -1'), '"- ".v:val')
         \ )
-  echomsg 'Uninstalled' '['
-        \ join(filter(copy(bundles), 'index(installed, v:val) == -1'))
-        \ ']'
-  echomsg 'Unlisted' '['
-        \ join(filter(copy(installed), 'index(bundles, v:val) == -1'))
-        \ ']'
 endfunction
 
 
