@@ -70,7 +70,7 @@ function! up2date#scm#mercurial#update(branch, revision)
   if !empty(a:branch)
     echo system(join([s:exec(), 'branch', a:branch]))
   endif
-  let cmd = join([s:exec(), 'incoming', '-q'])
+  let cmd = join([s:exec(), '--cwd "'.expand(getcwd()).'"', 'incoming', '-q'])
   let env = {
         \ 'cwd' : getcwd(),
         \ 'get' : function(s:SID.'pull'),
@@ -83,9 +83,10 @@ function! up2date#scm#mercurial#checkout(url, branch, revision, target)
   let opt = !empty(a:revision)
         \ ? ' --rev '.a:revision
         \ : (!empty(a:branch) ? ' --branch '.a:branch : '')
-  let cmd = join([s:exec(), 'clone', opt, a:url, a:target])
+  let cwd = expand(getcwd().'/'.a:target)
+  let cmd = join([s:exec(), 'clone', opt, a:url, cwd])
   let env = {
-        \ 'cwd' : expand(getcwd().'/'.a:target),
+        \ 'cwd' : cwd,
         \ 'get' : function(s:SID.'clone'),
         \ 'is_checkout' : 1,
         \ }
