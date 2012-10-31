@@ -213,23 +213,6 @@ function! s:diff_bundles(file)
 endfunction
 
 
-function! s:on_cursor_hold(bundles)
-  if !empty(a:bundles)
-    let bundle = a:bundles[0]
-    call s:process(bundle)
-    call remove(a:bundles, 0)
-  else
-    call up2date#cancel_bg()
-  endif
-
-  if mode() ==# 'n'
-    call feedkeys("g\<ESC>", 'n')
-  else
-    call feedkeys("a\<BS>",'n')
-  endif
-endfunction
-
-
 function! s:setup()
   let s:newplugins = 0
 endfunction
