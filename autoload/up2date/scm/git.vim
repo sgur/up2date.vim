@@ -49,10 +49,10 @@ function! s:pull(temp_name) dict
           \ '\r\n\|\n\|\r')
     let msg = []
     for s in split(status, '\n')
-      call add(msg, '> '.s)
+      call add(msg, '    '.s)
     endfor
     for c in changes
-      call add(msg, c)
+      call add(msg, '- '.c)
     endfor
     call up2date#log#log('update[git] -> '.self.cwd, msg)
   endif

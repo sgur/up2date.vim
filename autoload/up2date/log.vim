@@ -31,8 +31,9 @@ function! up2date#log#log(title, lines)
   let bufname = '__UP2DATE__'
   execute 'silent topleft pedit' bufname
   execute bufwinnr(bufname).'wincmd w'
-  setlocal buftype=nofile bufhidden=wipe noswapfile nowrap
-  call append(0, a:title)
+  setlocal buftype=nofile bufhidden=wipe noswapfile nowrap noreadonly
+  setfiletype markdown
+  call append(0, '# '.a:title)
   for l in a:lines
     call append(line('$'), l)
   endfor
@@ -41,6 +42,7 @@ function! up2date#log#log(title, lines)
   if cols < &previewheight
     execute 'resize' cols
   endif
+  setlocal readonly
   redraw
   execute curnr.'wincmd w'
 endfunction

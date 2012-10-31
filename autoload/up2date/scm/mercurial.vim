@@ -37,16 +37,19 @@ let s:SID = s:SID_PREFIX()
 function! s:pull(temp_name) dict
   if getfsize(a:temp_name) > 0
     lcd `=self.cwd`
-    let rev = system(join([s:exec(), 'log', '--template ''{rev}''', '-l 1']))
-    let status = system(join([s:exec(), 'pull', '--update']))
-    let changes = system(join([s:exec(), 'log', '--rev', rev.'..tip',
+    let rev = system(join([s:exec(), '--cwd "'.expand(getcwd()).'"',
+          \ 'log', '--template ''{rev}''', '-l 1']))
+    let status = system(join([s:exec(), '--cwd "'.expand(getcwd()).'"',
+          \ 'pull', '--update']))
+    let changes = system(join([s:exec(), '--cwd "'.expand(getcwd()).'"',
+          \ 'log', '--rev', rev.'..tip',
           \ '--template ''{node|short} {desc|strip|firstline}\n''']))
     let msg = []
     for s in split(status, '\n')
-      call add(msg, '> '.s)
+      call add(msg, '    '.s)
     endfor
     for c in changes
-      call add(msg, c)
+      call add(msg, '- '.c)
     endfor
     call up2date#log#log('update[mercurial]' '->' self.cwd, msg)
   endif
