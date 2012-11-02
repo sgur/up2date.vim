@@ -52,25 +52,26 @@ function! s:checkout(temp_name) dict
 endfunction
 
 
-function! up2date#scm#subversion#update(branch, revision)
+function! up2date#scm#subversion#update(branch, revision, dir)
   if !empty(a:branch)
     echo system(join([s:exec(), 'switch', a:branch]))
   endif
   let opt = !empty(a:revision) ? '--revision '.a:revision : ''
+  lcd `=a:dir`
   let cmd = join([s:exec(), 'update', opt])
   let env = {
-        \ 'cwd' : getcwd(),
+        \ 'cwd' : a:dir,
         \ 'get' : function(s:SID.'update'),
         \ }
   call up2date#worker#asynccommand(cmd, env)
 endfunction
 
 
-function! up2date#scm#subversion#checkout(url, branch, revision, target)
+function! up2date#scm#subversion#checkout(url, branch, revision, dir)
   let opt = !empty(a:revision) ? '--revision '.a:revision : ''
-  let cmd = join([s:exec(), 'checkout', opt, a:url, a:target])
+  let cmd = join([s:exec(), 'checkout', opt, a:url, a:dir])
   let env = {
-        \ 'cwd' : expand(getcwd().'/'.a:target),
+        \ 'cwd' : a:dir,
         \ 'get' : function(s:SID.'checkout'),
         \ 'is_checkout' : 1,
         \ }

@@ -69,7 +69,7 @@ function! s:checkout(temp_name) dict
 endfunction
 
 
-function! up2date#scm#git#update(branch, revision)
+function! up2date#scm#git#update(branch, revision, dir)
   if !empty(a:branch)
     call system(join([s:exec(), 'checkout', a:branch]))
   endif
@@ -77,14 +77,14 @@ function! up2date#scm#git#update(branch, revision)
     call system(join([s:exec(), 'checkout', a:revision]))
   else
     let hash = split(system(join([s:exec(),
-          \ '--git-dir="'.expand(getcwd().'/.git').'"',
+          \ '--git-dir="'.expand(a:dir.'/.git').'"',
           \ 'log', '--oneline', '-1', '--format=%h'])))[0]
     let cmd = join([s:exec(),
-          \ '--git-dir="'.expand(getcwd().'/.git').'"',
-          \ '--work-tree="'.expand(getcwd()).'"',
+          \ '--git-dir="'.expand(a:dir.'/.git').'"',
+          \ '--work-tree="'.expand(a:dir).'"',
           \ 'pull', '--rebase'])
     let env = {
-          \ 'cwd'  : getcwd(),
+          \ 'cwd'  : a:dir,
           \ 'get'  : function(s:SID.'pull'),
           \ 'hash' : hash,
           \ }
@@ -93,12 +93,11 @@ function! up2date#scm#git#update(branch, revision)
 endfunction
 
 
-function! up2date#scm#git#checkout(url, branch, revision, target)
+function! up2date#scm#git#checkout(url, branch, revision, dir)
   let opt = !empty(a:branch) ? '--branch '.a:branch : ''
-  let cwd = expand(getcwd().'/'.a:target)
-  let cmd = join([s:exec(), 'clone', opt, a:url, cwd])
+  let cmd = join([s:exec(), 'clone', opt, a:url, a:dir])
   let env = {
-        \ 'cwd' : cwd,
+        \ 'cwd' : a:dir,
         \ 'rev' : a:revision,
         \ 'get' : function(s:SID.'checkout'),
         \ 'is_checkout' : 1,
