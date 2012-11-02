@@ -45,19 +45,11 @@ endfunction
 
 function! up2date#worker#is_full()
   let limit = s:get_limit()
-  return s:workers >= limit ? 1 : 0
-endfunction
-
-
-function! up2date#worker#wait_until(count) abort
-  while s:workers > a:count
-    execute 'sleep' s:workers_wait.'m'
-  endwhile
+  return s:workers > limit ? 1 : 0
 endfunction
 
 
 function! up2date#worker#asynccommand(cmd, env)
-  call up2date#worker#wait_until(s:get_limit() - 1)
   if exists('g:loaded_asynccommand')
     call s:increment_worker()
     let env = a:env
