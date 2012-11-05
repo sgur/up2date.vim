@@ -61,5 +61,17 @@ function! up2date#log#log(lines)
 endfunction
 
 
+function! up2date#log#show()
+  execute 'new __UP2DATE__'
+  setlocal buftype=nofile bufhidden=wipe noswapfile nowrap noreadonly
+  call append(0, g:up2date_log)
+endfunction
+
+
+function! s:time()
+  return strftime('%c')
+endfunction
+
+
 let &cpo = s:save_cpo
 unlet s:save_cpo

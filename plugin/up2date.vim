@@ -34,3 +34,5 @@ command! -nargs=* -complete=customlist,up2date#complete Up2date
 command! -nargs=0 Up2dateAtCursor call up2date#update_line()
 
 command! -nargs=0 Up2dateStatus call up2date#status()
+
+command! -nargs=0 Up2dateLog call up2date#log#show()
