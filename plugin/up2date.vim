@@ -31,6 +31,8 @@ let g:loaded_up2date = 1
 command! -nargs=* -complete=customlist,up2date#complete Up2date
       \ call up2date#update(<f-args>)
 
+command! -nargs=0 Up2dateCancel call up2date#cancel()
+
 command! -nargs=0 Up2dateAtCursor call up2date#update_line()
 
 command! -nargs=0 Up2dateStatus call up2date#status()
