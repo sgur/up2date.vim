@@ -41,14 +41,16 @@ function! s:update(temp_name) dict
     for l in lines
       call add(msg, '> '.l)
     endfor
-    call up2date#log#log('update[subversion]' '->' self.cwd, msg)
+    call up2date#log#msg('update[subversion]' '->' self.cwd, msg)
+  else
+    call up2date#log#log('update[subversion]' '->' self.cwd.' (no update)')
   endif
 endfunction
 
 
 function! s:checkout(temp_name) dict
   let msg = ['checkout[subversion]' '->' self.cwd]
-  call up2date#log#log(fnamemodify(self.cwd, ':t'), msg)
+  call up2date#log#msg(fnamemodify(self.cwd, ':t'), msg)
 endfunction
 
 

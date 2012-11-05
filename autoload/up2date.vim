@@ -199,7 +199,7 @@ function! s:diff_bundles(file)
   let exists = map(
         \ split(globpath(s:bundle_dir(), '*'))
         \ , 'fnamemodify(v:val, ":t")')
-  call up2date#log#log('status'
+  call up2date#log#msg('status'
         \ , ['## Ready to install']
         \ + map(filter(copy(bundles), 'index(exists, v:val) == -1'), '"- ".v:val')
         \ + ['', '## Unrecognized']

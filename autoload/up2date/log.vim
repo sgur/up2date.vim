@@ -26,7 +26,11 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! up2date#log#log(title, lines)
+let g:up2date_log = []
+
+function! up2date#log#msg(title, lines)
+  call up2date#log#log(a:title)
+  call up2date#log#log(a:lines)
   let curnr = bufwinnr('%')
   let bufname = '__UP2DATE__'
   execute 'silent topleft pedit' bufname
@@ -46,6 +50,16 @@ function! up2date#log#log(title, lines)
   redraw
   execute curnr.'wincmd w'
 endfunction
+
+
+function! up2date#log#log(lines)
+  if type(a:lines ) == type([])
+    call extend(g:up2date_log, map(copy(a:lines), 'printf("%s: %s", s:time(), v:val)'))
+  else
+    call add(g:up2date_log, s:time().': '.a:lines)
+  endif
+endfunction
+
 
 let &cpo = s:save_cpo
 unlet s:save_cpo

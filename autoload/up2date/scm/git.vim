@@ -54,7 +54,9 @@ function! s:pull(temp_name) dict
     for c in changes
       call add(msg, '- '.c)
     endfor
-    call up2date#log#log('update[git] -> '.self.cwd, msg)
+    call up2date#log#msg('update[git] -> '.self.cwd, msg)
+  else
+    call up2date#log#log('update[git] -> '.self.cwd.' (no update)')
   endif
 endfunction
 
@@ -65,7 +67,7 @@ function! s:checkout(temp_name) dict
     echo system(join([s:exec(), 'checkout', self.rev]))
   endif
   let msg = ['checkout[git] -> '.self.cwd]
-  call up2date#log#log(fnamemodify(self.cwd, ':t'), msg)
+  call up2date#log#msg(fnamemodify(self.cwd, ':t'), msg)
 endfunction
 
 
