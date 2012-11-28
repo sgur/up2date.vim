@@ -132,6 +132,12 @@ function! s:bundle_dir()
 endfunction
 
 
+" Ftbundle directory
+function! s:ftbundle_dir()
+  return expand(get(g:, 'up2date_ftbundle_dir', s:vim_user_dir.'ftbundle').'/')
+endfunction
+
+
 " Cycle filetype off -> on
 function! s:cycle_filetype(is_update)
   if !a:is_update
@@ -162,7 +168,11 @@ function! s:process(repo)
     echoerr 'Invalid "BUNDLE:" line:' a:repo.line
     return
   endif
-  let dir = s:bundle_dir().a:repo.target
+  if !empty(a:repo.filetype)
+    let dir = s:ftbundle_dir().a:repo.filetype.'/'.a:repo.target
+  else
+    let dir = s:bundle_dir().a:repo.target
+  endif
   let new_plugin = 0
   if isdirectory(expand(dir))
     call s:scm_cmd('update', a:repo, dir)
@@ -180,6 +190,7 @@ function! s:scm_cmd(cmd, repo, dir)
   if a:cmd ==# 'update'
     call up2date#scm#{a:repo.scm}#update(a:repo.branch, a:repo.revision, a:dir)
   else
+    call mkdir(a:dir, 'p')
     call up2date#scm#{a:repo.scm}#checkout(a:repo.url, a:repo.branch,
           \ a:repo.revision, a:dir)
   endif
@@ -194,16 +205,34 @@ endfunction
 
 
 function! s:diff_bundles(file)
-  let bundles = map(filter(s:collect_repos(a:file), '!empty(v:val)')
-        \ , 'v:val.target')
-  let exists = map(
+  let all_bundles = filter(s:collect_repos(a:file), '!empty(v:val)')
+  let _ = []
+  for b in all_bundles
+    let i = stridx(b.target, '/')
+    if i >= 0
+      let b.target = b.target[: i-1]
+    endif
+    call add(_, b)
+  endfor
+  let all_bundles = _
+  let bundles = map(filter(copy(all_bundles), 'v:val.filetype == ""'),
+        \ 'v:val.target')
+  let ftbundles = map(filter(copy(all_bundles), 'v:val.filetype != ""'),
+        \ 'v:val.target')
+  let exists_bundles = map(
         \ split(globpath(s:bundle_dir(), '*'))
         \ , 'fnamemodify(v:val, ":t")')
+  let exists_ftbundles = map(
+        \ split(globpath(s:ftbundle_dir().'/*', '*'))
+        \ , 'fnamemodify(v:val, ":t")')
+  call filter(exists_bundles, 'index(exists_ftbundles, v:val) == -1')
   call up2date#log#msg('status'
         \ , ['## Ready to install']
-        \ + map(filter(copy(bundles), 'index(exists, v:val) == -1'), '"- ".v:val')
+        \ + map(filter(copy(bundles), 'index(exists_bundles, v:val) == -1'), '"- ".v:val')
+        \ + map(filter(copy(ftbundles), 'index(exists_ftbundles, v:val) == -1'), '"- ".v:val')
         \ + ['', '## Unrecognized']
-        \ + map(filter(copy(exists), 'index(bundles, v:val) == -1'), '"- ".v:val')
+        \ + map(filter(copy(exists_bundles), 'index(bundles, v:val) == -1'), '"- ".v:val')
+        \ + map(filter(copy(exists_ftbundles), 'index(ftbundles, v:val) == -1'), '"- ".v:val')
         \ )
 endfunction
 

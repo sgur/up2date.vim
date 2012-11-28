@@ -25,6 +25,11 @@ describe 'Option parsing module'
     Expect Call('s:parse_options', 'git://github.com/Shougo/neocomplcache.git /neocon').target ==# 'neocon'
   end
 
+  it 'should detect ftbundle'
+  Expect Call('s:parse_options', 'https://github.com/Rip-Rip/clang_complete.git #cpp').filetype ==# 'cpp'
+  Expect Call('s:parse_options', 'https://github.com/Rip-Rip/clang_complete.git').filetype ==# ''
+  end
+
   it 'should detect scm type'
     Expect Call('s:scm_from_line', 'git://github.com/Shougo/neocomplcache.git').scm
           \ ==# 'git'
@@ -91,7 +96,6 @@ describe 'Line parsing module'
     Expect opt.scm ==# 'git'
     Expect opt.url ==# 'git://github.com/Shougo/neocomplcache.git'
     Expect opt.revision ==# ''
-  nnoremap <C-p><C-p> :<C-u>CtrlPDir
     Expect opt.branch ==# 'develop'
     Expect opt.target ==# 'neocomplcache'
     let opt = Call('up2date#line#parse', 'git://github.com/Shougo/neocomplcache.git')
@@ -100,6 +104,13 @@ describe 'Line parsing module'
     Expect opt.revision ==# ''
     Expect opt.branch ==# ''
     Expect opt.target ==# 'neocomplcache'
+    let opt = Call('up2date#line#parse', 'https://github.com/Rip-Rip/clang_complete.git #cpp')
+    Expect opt.scm ==# 'git'
+    Expect opt.url ==# 'https://github.com/Rip-Rip/clang_complete.git'
+    Expect opt.revision ==# ''
+    Expect opt.branch ==# ''
+    Expect opt.target ==# 'clang_complete'
+    Expect opt.filetype ==# 'cpp'
   end
 end
 

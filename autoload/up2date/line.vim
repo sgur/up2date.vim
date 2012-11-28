@@ -40,9 +40,10 @@ function! up2date#line#parse(line)
         \ 'branch'   : opt.branch,
         \ 'line'     : a:line,
         \ 'revision' : opt.revision,
-        \ 'scm'     : !empty(opt.scm) ? opt.scm : repo.scm,
+        \ 'scm'      : !empty(opt.scm) ? opt.scm : repo.scm,
         \ 'target'   : !empty(opt.target) ? opt.target : repo.dir,
         \ 'url'      : repo.url,
+        \ 'filetype' : opt.filetype,
         \ }
 endfunction
 
@@ -54,6 +55,7 @@ function! s:parse_options(line)
         \ 'scm'      : '',
         \ 'target'   : '',
         \ 'url'      : '',
+        \ 'filetype' : '',
         \ }
   if empty(a:line)
     return options
@@ -69,6 +71,8 @@ function! s:parse_options(line)
       let options.target   = elem[1:]
     elseif !stridx(elem, '-')   " scm
       let options.scm      = elem[1:]
+    elseif !stridx(elem, '#')   " ftbundle
+      let options.filetype = elem[1:]
     endif
   endfor
   return options
