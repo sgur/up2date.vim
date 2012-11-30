@@ -1,6 +1,6 @@
 "=============================================================================
 " FILE: autoload/up2date/util.vim
-" AUTHOR: sgur <sgurrr@gmail.com>
+" AUTHOR: sgur <sgurrr+vim@gmail.com>
 " License: MIT license  {{{
 "     Permission is hereby granted, free of charge, to any person obtaining
 "     a copy of this software and associated documentation files (the
