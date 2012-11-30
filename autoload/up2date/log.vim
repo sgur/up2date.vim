@@ -62,9 +62,20 @@ endfunction
 
 
 function! up2date#log#show()
-  execute 'new __UP2DATE__'
+  let curnr = bufwinnr('%')
+  let bufname = '__UP2DATE_LOG__'
+  if bufwinnr(bufname) >= 0
+    execute bufwinnr(bufname).'wincmd w'
+  else
+    execute 'new' bufname
+  endif
   setlocal buftype=nofile bufhidden=wipe noswapfile nowrap noreadonly
+  let ul=&undolevels
+  set undolevels=0
+  normal! gg"_dG
   call append(0, g:up2date_log)
+  let &undolevels=ul
+  execute curnr.'wincmd w'
 endfunction
 
 
