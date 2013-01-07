@@ -41,12 +41,12 @@ let s:SID = s:SID_PREFIX()
 function! s:pull(temp_name) dict
   let status = readfile(a:temp_name)
   if !empty(status) && stridx(status[0], 'up to date') == -1
-    lcd `=self.cwd`
     let changes = split(
-          \ system(join([s:exec(),
-          \ '--git-dir="'.expand(self.cwd.'/.git').'"',
-          \ 'log', '--oneline', self.hash.'..HEAD','--'])),
-          \ '\r\n\|\n\|\r')
+          \ system(join([s:exec()
+          \ , '--git-dir="'.expand(self.cwd.'/.git').'"'
+          \ , '--work-tree="'.expand(self.cwd).'"'
+          \ , 'log', '--oneline', self.hash.'..HEAD','--']))
+          \ , '\r\n\|\n\|\r')
     let msg = []
     for s in split(status, '\n')
       call add(msg, '    '.s)
@@ -64,7 +64,10 @@ endfunction
 function! s:checkout(temp_name) dict
   if !empty(self.rev)
     lcd `=self.cwd`
-    echo system(join([s:exec(), 'checkout', self.rev]))
+    echo system(join([s:exec()
+          \ , '--git-dir="'.expand(self.cwd.'/.git').'"'
+          \ , '--work-tree="'.expand(self.cwd).'"'
+          \ , 'checkout', self.rev]))
   endif
   let msg = ['checkout[git] -> '.self.cwd]
   call up2date#log#msg(fnamemodify(self.cwd, ':t'), msg)
@@ -78,17 +81,17 @@ function! up2date#scm#git#update(branch, revision, dir)
   if !empty(a:revision)
     call system(join([s:exec(), 'checkout', a:revision]))
   else
-    let hash = split(system(join([s:exec(),
-          \ '--git-dir="'.expand(a:dir.'/.git').'"',
-          \ 'log', '--oneline', '-1', '--format=%h'])))[0]
-    let cmd = join([s:exec(),
-          \ '--git-dir="'.expand(a:dir.'/.git').'"',
-          \ '--work-tree="'.expand(a:dir).'"',
-          \ 'pull', '--rebase'])
-    let env = {
-          \ 'cwd'  : a:dir,
-          \ 'get'  : function(s:SID.'pull'),
-          \ 'hash' : hash,
+    let hash = split(system(join([s:exec()
+          \ , '--git-dir="'.expand(a:dir.'/.git').'"'
+          \ , 'log', '--oneline', '-1', '--format=%h'])))[0]
+    let cmd = join([s:exec()
+          \ , '--git-dir="'.expand(a:dir.'/.git').'"'
+          \ , '--work-tree="'.expand(a:dir).'"'
+          \ , 'pull', '--rebase'])
+    let env =
+          \ { 'cwd'  : a:dir
+          \ , 'get'  : function(s:SID.'pull')
+          \ , 'hash' : hash
           \ }
     call up2date#worker#asynccommand(cmd, env)
   endif
