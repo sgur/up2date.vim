@@ -58,9 +58,9 @@ function! up2date#scm#subversion#update(branch, revision, dir)
   if !empty(a:branch)
     echo system(join([s:exec(), 'switch', a:branch]))
   endif
-  let opt = !empty(a:revision) ? '--revision '.a:revision : ''
-  lcd `=a:dir`
-  let cmd = join([s:exec(), 'update', opt])
+  let opt = '--quiet'
+        \ . (!empty(a:revision) ? '--revision '. a:revision : '')
+  let cmd = join([s:exec(), 'update', opt, a:dir])
   let env = {
         \ 'cwd' : a:dir,
         \ 'get' : function(s:SID.'update'),
