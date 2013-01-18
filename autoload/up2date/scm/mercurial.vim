@@ -50,7 +50,7 @@ function! s:pull(temp_name) dict
     for c in changes
       call add(msg, '- '.c)
     endfor
-    call up2date#log#msg('update[mercurial] ->' self.cwd, msg)
+    call up2date#log#msg('update[mercurial] -> '.self.cwd, msg)
   else
     call up2date#log#log('update[mercurial] -> '.self.cwd.' (no update)')
   endif

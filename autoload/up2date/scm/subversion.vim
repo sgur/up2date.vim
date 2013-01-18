@@ -41,9 +41,9 @@ function! s:update(temp_name) dict
     for l in lines
       call add(msg, '> '.l)
     endfor
-    call up2date#log#msg('update[subversion]' '->' self.cwd, msg)
+    call up2date#log#msg('update[subversion] -> '.self.cwd, msg)
   else
-    call up2date#log#log('update[subversion]' '->' self.cwd.' (no update)')
+    call up2date#log#log('update[subversion] -> '.self.cwd.' (no update)')
   endif
 endfunction
 
