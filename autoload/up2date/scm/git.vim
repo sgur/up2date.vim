@@ -76,10 +76,21 @@ endfunction
 
 function! up2date#scm#git#update(branch, revision, dir)
   if !empty(a:branch)
-    call system(join([s:exec(), 'checkout', a:branch]))
+    call system(join([s:exec()
+          \ , '--git-dir="'.expand(a:dir.'/.git').'"'
+          \ , '--work-tree="'.expand(a:dir).'"'
+          \ , 'checkout', a:branch]))
+  else
+    call system(join([s:exec()
+          \ , '--git-dir="'.expand(a:dir.'/.git').'"'
+          \ , '--work-tree="'.expand(a:dir).'"'
+          \ , 'checkout', 'master']))
   endif
   if !empty(a:revision)
-    call system(join([s:exec(), 'checkout', a:revision]))
+    call system(join([s:exec()
+          \ , '--git-dir="'.expand(a:dir.'/.git').'"'
+          \ , '--work-tree="'.expand(a:dir).'"'
+          \ , 'checkout', a:revision]))
   else
     let hash = split(system(join([s:exec()
           \ , '--git-dir="'.expand(a:dir.'/.git').'"'
