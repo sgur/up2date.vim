@@ -56,7 +56,7 @@ function! up2date#worker#asynccommand(cmd, env)
     let env.callback = a:env.get
     function! env.get(temp_name) dict
       echomsg self.callback
-      call up2date#start()
+      call up2date#run()
       call self.callback(a:temp_name)
       call s:decrement_worker()
       if exists('self.is_checkout') && self.is_checkout

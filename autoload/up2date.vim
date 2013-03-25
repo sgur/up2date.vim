@@ -27,6 +27,8 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 
+let s:repos = []
+
 
 " `:Up2date [<bundle_name>]`
 function! up2date#update(...)
@@ -39,13 +41,7 @@ function! up2date#update(...)
   if a:0
     let repos = filter(repos, 'index(a:000, v:val.target) >= 0')
   endif
-  if empty(s:repos)
-    let s:repos = repos
-  else
-    call add(s:repos, repos)
-  endif
-  call s:setup()
-  call up2date#start()
+  call up2date#start(repos)
 endfunction
 
 
@@ -79,16 +75,36 @@ function! up2date#update_line()
   endif
 
   let repo = up2date#line#parse(line)
-  call s:process(repo)
+  call up2date#start([repo])
 endfunction
 
 
-function! up2date#start()
+function! up2date#input()
+  let line = input('BUNDLE:')
+  let repo = up2date#line#parse(line)
+  call up2date#start([repo])
+endfunction
+
+
+function! up2date#start(repo)
+  if type(a:repo) == type([])
+    call extend(s:repos, a:repo)
+  elseif type(a:repo) == type({})
+    call add(s:repos, a:repo)
+  else
+    return
+  endif
+  let s:newplugins = 0
+  call up2date#run()
+endfunction
+
+
+function! up2date#run()
   let more = &more
   set nomore
   try 
     if empty(s:repos)
-      call s:teardown()
+      call s:cycle_filetype(s:newplugins)
     else
       while !empty(s:repos) && !up2date#worker#is_full()
         let [repo, s:repos] = [s:repos[0], s:repos[1:]]
@@ -234,15 +250,6 @@ function! s:diff_bundles(file)
         \ + map(filter(copy(exists_bundles), 'index(bundles, v:val) == -1'), '"- ".v:val')
         \ + map(filter(copy(exists_ftbundles), 'index(ftbundles, v:val) == -1'), '"- ".v:val')
         \ )
-endfunction
-
-
-function! s:setup()
-  let s:newplugins = 0
-endfunction
-
-function! s:teardown()
-  call s:cycle_filetype(s:newplugins)
 endfunction
 
 
