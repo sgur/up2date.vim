@@ -109,6 +109,7 @@ function! up2date#run()
       while !empty(s:repos) && !up2date#worker#is_full()
         let [repo, s:repos] = [s:repos[0], s:repos[1:]]
         let s:newplugins = s:process(repo) ? 1 : s:newplugins
+        sleep 200m
       endwhile
     endif
   finally
