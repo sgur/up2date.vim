@@ -41,7 +41,11 @@ function! up2date#update(...)
   if a:0
     let repos = filter(repos, 'index(a:000, v:val.target) >= 0')
   endif
-  call up2date#start(repos)
+  if !empty(repos)
+    call up2date#start(repos)
+  else
+    echoerr 'Specified bundle '''.join(a:000).''' not found'
+  endif
 endfunction
 
 
