@@ -28,6 +28,17 @@ if exists('g:loaded_up2date') && g:loaded_up2date
 endif
 let g:loaded_up2date = 1
 
+" Variables {{{
+
+let g:up2date_bundle_dir   = expand(get(g:, 'up2date_bundle_dir', up2date#default#bundle_dir()))
+let g:up2date_ftbundle_dir = expand(get(g:, 'up2date_ftbundle_dir', up2date#default#ftbunde_dir()))
+let g:up2date_source_path  = expand(get(g:, 'up2date_source_path', up2date#default#source_path()))
+let g:up2date_max_workers  = get(g:, 'up2date_max_workers', up2date#default#max_workers())
+
+" }}}
+
+" Commands {{{
+
 command! -nargs=* -complete=customlist,up2date#complete Up2date
       \ call up2date#update(<f-args>)
 
@@ -40,3 +51,6 @@ command! -nargs=0 Up2dateStatus call up2date#status()
 command! -nargs=0 Up2dateLog call up2date#log#show()
 
 command! -nargs=0 Up2dateInput call up2date#input()
+
+" }}}
+

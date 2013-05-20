@@ -137,11 +137,6 @@ endfunction
 
 
 
-" Vim user directory
-let s:vim_user_dir = expand((has('win32') || has('win64'))
-      \ ? '~/vimfiles/' : '~/.vim/')
-
-
 " Repositories to update
 let s:repos = []
 
@@ -149,13 +144,13 @@ let s:repos = []
 
 " Bundle directory
 function! s:bundle_dir()
-  return expand(get(g:, 'up2date_bundle_dir', s:vim_user_dir.'bundle').'/')
+  return g:up2date_bundle_dir
 endfunction
 
 
 " Ftbundle directory
 function! s:ftbundle_dir()
-  return expand(get(g:, 'up2date_ftbundle_dir', s:vim_user_dir.'ftbundle').'/')
+  return g:up2date_ftbundle_dir
 endfunction
 
 
@@ -171,16 +166,7 @@ endfunction
 
 
 function! s:select_source()
-  return expand(get(g:, 'up2date_source_path', s:default_source_path('~/')))
-endfunction
-
-
-function! s:default_source_path(dir)
-  let dir = (a:dir !~ '/$') ? a:dir.'/' : a:dir
-  let lists =  filter(
-        \ map([dir,'.vimrc', dir.'_vimrc'], 'expand(v:val)'),
-        \ 'filereadable(v:val)')
-  return !empty(lists) ? lists[0] : ''
+  return g:up2date_source_path
 endfunction
 
 

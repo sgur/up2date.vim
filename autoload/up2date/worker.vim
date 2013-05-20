@@ -27,7 +27,6 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 let s:workers = 0
-let s:default_max_workers = 2
 let s:workers_wait = 100
 
 function! s:increment_worker()
@@ -40,7 +39,7 @@ function! s:decrement_worker()
 endfunction
 
 function! s:get_limit()
-  return get(g:, 'up2date_max_workers', s:default_max_workers)
+  return g:up2date_max_workers
 endfunction
 
 function! up2date#worker#is_full()
