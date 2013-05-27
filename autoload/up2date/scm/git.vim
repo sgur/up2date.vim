@@ -75,6 +75,9 @@ endfunction
 
 
 function! up2date#scm#git#update(branch, revision, dir)
+  if !executable(s:exec())
+    echoerr 'Up2date: "'.s:exec().'" command not found.'
+  endif
   if !empty(a:branch)
     call system(join([s:exec()
           \ , '--git-dir="'.expand(a:dir.'/.git').'"'
@@ -110,6 +113,9 @@ endfunction
 
 
 function! up2date#scm#git#checkout(url, branch, revision, dir)
+  if !executable(s:exec())
+    echoerr 'Up2date: "'.s:exec().'" command not found.'
+  endif
   let opt = !empty(a:branch) ? '--branch '.a:branch : ''
   let cmd = join([s:exec(), 'clone', opt, a:url, a:dir])
   let env = {

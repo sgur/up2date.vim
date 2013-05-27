@@ -55,6 +55,9 @@ endfunction
 
 
 function! up2date#scm#subversion#update(branch, revision, dir)
+  if !executable(s:exec())
+    echoerr 'Up2date: "'.s:exec().'" command not found.'
+  endif
   if !empty(a:branch)
     echo system(join([s:exec(), 'switch', a:branch]))
   endif
@@ -70,6 +73,9 @@ endfunction
 
 
 function! up2date#scm#subversion#checkout(url, branch, revision, dir)
+  if !executable(s:exec())
+    echoerr 'Up2date: "'.s:exec().'" command not found.'
+  endif
   let opt = !empty(a:revision) ? '--revision '.a:revision : ''
   let cmd = join([s:exec(), 'checkout', opt, a:url, a:dir])
   let env = {

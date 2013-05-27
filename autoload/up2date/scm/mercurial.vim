@@ -24,7 +24,7 @@
 "=============================================================================
 
 function! s:exec()
-  return get(g:, 'up2date_mercurial_executable', 'hg --encoding utf-8')
+  return get(g:, 'up2date_mercurial_executable', 'hg')
 endfunction
 
 
@@ -37,10 +37,12 @@ let s:SID = s:SID_PREFIX()
 function! s:pull(temp_name) dict
   if getfsize(a:temp_name) > 0
     let rev = system(join([s:exec(), '--cwd "'.expand(self.cwd).'"',
+          \ '--encoding utf-8',
           \ 'log', '--template ''{rev}''', '-l 1']))
     let status = system(join([s:exec(), '--cwd "'.expand(self.cwd).'"',
           \ 'pull', '--update']))
     let changes = system(join([s:exec(), '--cwd "'.expand(self.cwd).'"',
+          \ '--encoding utf-8',
           \ 'log', '--rev', rev.'..tip',
           \ '--template ''{node|short} {desc|strip|firstline}\n''']))
     let msg = []
@@ -64,6 +66,9 @@ endfunction
 
 
 function! up2date#scm#mercurial#update(branch, revision, dir)
+  if !executable(s:exec())
+    echoerr 'Up2date: "'.s:exec().'" command not found.'
+  endif
   if !empty(a:revision)
     echo system(join([s:exec(), 'pull', '--update', '-rev '.a:revision]))
     return
@@ -81,6 +86,9 @@ endfunction
 
 
 function! up2date#scm#mercurial#checkout(url, branch, revision, dir)
+  if !executable(s:exec())
+    echoerr 'Up2date: "'.s:exec().'" command not found.'
+  endif
   let opt = !empty(a:revision)
         \ ? ' --rev '.a:revision
         \ : (!empty(a:branch) ? ' --branch '.a:branch : '')
