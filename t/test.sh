@@ -5,5 +5,5 @@ if [ ${pwd##*/} == t ] ; then
 	cd ..
 fi
 
-../../bundle/vim-vspec/bin/vspec ../../bundle/vim-vspec . t/up2date.vim
 ../../bundle/vim-vspec/bin/vspec ../../bundle/vim-vspec . t/line.vim
+../../bundle/vim-vspec/bin/vspec ../../bundle/vim-vspec . t/default.vim

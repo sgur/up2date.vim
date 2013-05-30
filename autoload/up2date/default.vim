@@ -60,12 +60,25 @@ let s:default_max_workers = 2
 
 function! s:default_source_path(dir)
   let dir = (a:dir !~ '/$') ? a:dir.'/' : a:dir
-  let lists =  filter(
-        \ map([dir,'.vimrc', dir.'_vimrc'], 'expand(v:val)'),
+  let lists =  filter(map([dir.'.vimrc', dir.'_vimrc'], 'expand(v:val)'),
         \ 'filereadable(v:val)')
   return !empty(lists) ? lists[0] : ''
 endfunction
 
+" }}}
+
+
+
+" vspec helper functions. see vspec#hint() {{{
+function! up2date#default#scope()  "{{{
+  return s:
+endfunction "}}}
+
+
+function! up2date#default#sid()  "{{{
+  return maparg('<SID>', 'n')
+endfunction "}}}
+nnoremap <SID>  <SID>
 " }}}
 
 
