@@ -30,12 +30,36 @@ let g:loaded_up2date = 1
 
 " Variables {{{
 
-let g:up2date_bundle_dir   = expand(get(g:, 'up2date_bundle_dir', up2date#default#bundle_dir()))
-let g:up2date_ftbundle_dir = expand(get(g:, 'up2date_ftbundle_dir', up2date#default#ftbunde_dir()))
-let g:up2date_source_path  = expand(get(g:, 'up2date_source_path', up2date#default#source_path()))
-let g:up2date_max_workers  = get(g:, 'up2date_max_workers', up2date#default#max_workers())
+function! s:initalize_variables()
+  let g:up2date_bundle_dir =
+        \ expand(get(g:, 'up2date_bundle_dir', s:vim_user_dir.'bundle'.'/'))
+  let g:up2date_ftbundle_dir =
+        \ expand(get(g:, 'up2date_ftbundle_dir', s:vim_user_dir.'ftbundle'.'/'))
+  let g:up2date_source_path =
+        \ expand(get(g:, 'up2date_source_path', s:default_source_path('~/')))
+  let g:up2date_max_workers =
+        \ get(g:, 'up2date_max_workers', s:default_max_workers)
+endfunction
+
+" Vim user directory
+let s:vim_user_dir = expand((has('win32') || has('win64'))
+      \ ? '~/vimfiles/' : '~/.vim/')
+
+" Defualt parallel workers
+let s:default_max_workers = 2
+
+function! s:default_source_path(dir)
+  let dir = (a:dir !~ '/$') ? a:dir.'/' : a:dir
+  let lists =  filter(
+        \ map([dir,'.vimrc', dir.'_vimrc'], 'expand(v:val)'),
+        \ 'filereadable(v:val)')
+  return !empty(lists) ? lists[0] : ''
+endfunction
+
+call s:initalize_variables()
 
 " }}}
+
 
 " Commands {{{
 
