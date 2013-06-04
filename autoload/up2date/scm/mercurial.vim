@@ -28,6 +28,11 @@ function! s:exec()
 endfunction
 
 
+function! s:arguments()
+  return '--encoding utf-8 --color false'
+endfunction
+
+
 function! s:SID_PREFIX()
   return matchstr(expand('<sfile>'), '<SNR>\d\+_')
 endfunction
@@ -36,15 +41,16 @@ let s:SID = s:SID_PREFIX()
 
 function! s:pull(temp_name) dict
   if getfsize(a:temp_name) > 0
-    let rev = system(join([s:exec(), '--cwd "'.expand(self.cwd).'"',
-          \ '--encoding utf-8',
-          \ 'log', '--template ''{rev}''', '-l 1']))
-    let status = system(join([s:exec(), '--cwd "'.expand(self.cwd).'"',
-          \ 'pull', '--update']))
-    let changes = system(join([s:exec(), '--cwd "'.expand(self.cwd).'"',
-          \ '--encoding utf-8',
-          \ 'log', '--rev', rev.'..tip',
-          \ '--template ''{node|short} {desc|strip|firstline}\n''']))
+    let rev = system(join([s:exec(), s:arguments()
+          \ , '--cwd "'.expand(self.cwd).'"'
+          \ , 'log', '--template ''{rev}''', '-l 1']))
+    let status = system(join([s:exec(), s:arguments()
+          \ , '--cwd "'.expand(self.cwd).'"'
+          \ , 'pull', '--update']))
+    let changes = system(join([s:exec(), s:arguments()
+          \ , '--cwd "'.expand(self.cwd).'"'
+          \ , 'log', '--rev', rev.'..tip'
+          \ , '--template ''{node|short} {desc|strip|firstline}\n''']))
     let msg = []
     for s in split(status, '\n')
       call add(msg, '    '.s)
@@ -70,13 +76,12 @@ function! up2date#scm#mercurial#update(branch, revision, dir)
     echoerr 'Up2date: "'.s:exec().'" command not found.'
   endif
   if !empty(a:revision)
-    echo system(join([s:exec(), 'pull', '--update', '-rev '.a:revision]))
+    call system(join([s:exec(), 'pull', '--update', '-rev '.a:revision]))
     return
+  elseif !empty(a:branch)
+    call system(join([s:exec(), 'checkout', a:branch]))
   endif
-  if !empty(a:branch)
-    echo system(join([s:exec(), 'branch', a:branch]))
-  endif
-  let cmd = join([s:exec(), '--cwd "'.expand(a:dir).'"', 'incoming', '-q'])
+  let cmd = join([s:exec(), s:arguments(), '--cwd "'.expand(a:dir).'"', 'incoming', '-q'])
   let env = {
         \ 'cwd' : a:dir,
         \ 'get' : function(s:SID.'pull'),
@@ -92,7 +97,7 @@ function! up2date#scm#mercurial#checkout(url, branch, revision, dir)
   let opt = !empty(a:revision)
         \ ? ' --rev '.a:revision
         \ : (!empty(a:branch) ? ' --branch '.a:branch : '')
-  let cmd = join([s:exec(), 'clone', opt, a:url, a:dir])
+  let cmd = join([s:exec(), s:arguments(), 'clone', opt, a:url, a:dir])
   let env = {
         \ 'cwd' : a:dir,
         \ 'get' : function(s:SID.'clone'),
