@@ -78,7 +78,13 @@ function! up2date#scm#git#update(branch, revision, dir)
   if !executable(s:exec())
     echoerr 'Up2date: "'.s:exec().'" command not found.'
   endif
-  if !empty(a:branch)
+  if !empty(a:revision)
+    call system(join([s:exec()
+          \ , '--git-dir="'.expand(a:dir.'/.git').'"'
+          \ , '--work-tree="'.expand(a:dir).'"'
+          \ , 'checkout', a:revision]))
+    return
+  elseif !empty(a:branch)
     call system(join([s:exec()
           \ , '--git-dir="'.expand(a:dir.'/.git').'"'
           \ , '--work-tree="'.expand(a:dir).'"'
@@ -89,26 +95,19 @@ function! up2date#scm#git#update(branch, revision, dir)
           \ , '--work-tree="'.expand(a:dir).'"'
           \ , 'checkout', 'master']))
   endif
-  if !empty(a:revision)
-    call system(join([s:exec()
-          \ , '--git-dir="'.expand(a:dir.'/.git').'"'
-          \ , '--work-tree="'.expand(a:dir).'"'
-          \ , 'checkout', a:revision]))
-  else
-    let hash = split(system(join([s:exec()
-          \ , '--git-dir="'.expand(a:dir.'/.git').'"'
-          \ , 'log', '--oneline', '-1', '--format=%h'])))[0]
-    let cmd = join([s:exec()
-          \ , '--git-dir="'.expand(a:dir.'/.git').'"'
-          \ , '--work-tree="'.expand(a:dir).'"'
-          \ , 'pull', '--rebase'])
-    let env =
-          \ { 'cwd'  : a:dir
-          \ , 'get'  : function(s:SID.'pull')
-          \ , 'hash' : hash
-          \ }
-    call up2date#worker#asynccommand(cmd, env)
-  endif
+  let hash = split(system(join([s:exec()
+        \ , '--git-dir="'.expand(a:dir.'/.git').'"'
+        \ , 'log', '--oneline', '-1', '--format=%h'])))[0]
+  let cmd = join([s:exec()
+        \ , '--git-dir="'.expand(a:dir.'/.git').'"'
+        \ , '--work-tree="'.expand(a:dir).'"'
+        \ , 'pull', '--rebase'])
+  let env =
+        \ { 'cwd'  : a:dir
+        \ , 'get'  : function(s:SID.'pull')
+        \ , 'hash' : hash
+        \ }
+  call up2date#worker#asynccommand(cmd, env)
 endfunction
 
 
