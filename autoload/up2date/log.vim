@@ -31,24 +31,6 @@ let g:up2date_log = []
 function! up2date#log#msg(title, lines)
   call up2date#log#log(a:title)
   call up2date#log#log(a:lines)
-  let curnr = bufwinnr('%')
-  let bufname = '__UP2DATE__'
-  execute 'silent topleft pedit' bufname
-  execute bufwinnr(bufname).'wincmd w'
-  setlocal foldlevel=99 buftype=nofile bufhidden=wipe noswapfile nowrap noreadonly
-  setfiletype markdown
-  call append(0, '# '.a:title)
-  for l in a:lines
-    call append(line('$'), l)
-  endfor
-  1
-  let cols = len(a:lines)+2
-  if cols < &previewheight
-    execute 'resize' cols
-  endif
-  setlocal readonly
-  redraw
-  execute curnr.'wincmd w'
 endfunction
 
 
