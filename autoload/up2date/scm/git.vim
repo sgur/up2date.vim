@@ -69,8 +69,7 @@ function! s:checkout(temp_name) dict
           \ , '--work-tree="'.expand(self.cwd).'"'
           \ , 'checkout', self.rev]))
   endif
-  let msg = ['checkout[git] -> '.self.cwd]
-  call up2date#log#msg(fnamemodify(self.cwd, ':t'), msg)
+  call up2date#log#msg('checkout[git] -> ' . self.cwd, '(new)')
 endfunction
 
 

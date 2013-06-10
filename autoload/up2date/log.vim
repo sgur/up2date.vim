@@ -30,18 +30,26 @@ let g:up2date_log = []
 
 function! up2date#log#msg(title, lines)
   call up2date#log#log(a:title)
-  call up2date#log#log(a:lines)
+  call up2date#log#log(a:lines, 0)
 endfunction
 
 
-function! up2date#log#log(lines)
+function! up2date#log#log(lines, ...)
+  let is_date_header = (a:0 == 0 || a:1)
+  if is_date_header
+    call add(g:up2date_log, '# ' . s:time())
+  endif
   if type(a:lines ) == type([])
-    call extend(g:up2date_log, map(copy(a:lines), 'printf("%s: %s", s:time(), v:val)'))
+    call extend(g:up2date_log, a:lines)
   else
-    call add(g:up2date_log, s:time().': '.a:lines)
+    call add(g:up2date_log, a:lines)
   endif
 endfunction
 
+
+function! up2date#log#clear()
+  let g:up2date_log = []
+endfunction
 
 function! up2date#log#show()
   let curnr = bufwinnr('%')
@@ -51,7 +59,8 @@ function! up2date#log#show()
   else
     execute 'new' bufname
   endif
-  setlocal buftype=nofile bufhidden=wipe noswapfile nowrap noreadonly
+  setfiletype markdown
+  setlocal buftype=nofile bufhidden=wipe noswapfile nowrap noreadonly previewwindow
   let ul=&undolevels
   set undolevels=0
   normal! gg"_dG

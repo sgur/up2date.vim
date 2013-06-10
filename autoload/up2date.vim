@@ -66,7 +66,13 @@ function! up2date#status()
     echoerr 'up2date: source file not found!'
     return
   endif
-  call s:diff_bundles(source)
+  let [installable, not_installed] = s:diff_bundles(source)
+  call up2date#log#log('## Status', 1)
+  call up2date#log#log('### Ready to install', 0)
+  call up2date#log#log(installable, 0)
+  call up2date#log#log('### Unrecognized', 0)
+  call up2date#log#log(not_installed, 0)
+  call up2date#log#show()
 endfunction
 
 
@@ -237,14 +243,11 @@ function! s:diff_bundles(file)
         \ split(globpath(s:ftbundle_dir().'/*', '*'))
         \ , 'fnamemodify(v:val, ":t")')
   call filter(exists_bundles, 'index(exists_ftbundles, v:val) == -1')
-  call up2date#log#msg('status'
-        \ , ['## Ready to install']
-        \ + map(filter(copy(bundles), 'index(exists_bundles, v:val) == -1'), '"- ".v:val')
+  return  [ map(filter(copy(bundles), 'index(exists_bundles, v:val) == -1'), '"- ".v:val')
         \ + map(filter(copy(ftbundles), 'index(exists_ftbundles, v:val) == -1'), '"- ".v:val')
-        \ + ['', '## Unrecognized']
-        \ + map(filter(copy(exists_bundles), 'index(bundles, v:val) == -1'), '"- ".v:val')
+        \ , map(filter(copy(exists_bundles), 'index(bundles, v:val) == -1'), '"- ".v:val')
         \ + map(filter(copy(exists_ftbundles), 'index(ftbundles, v:val) == -1'), '"- ".v:val')
-        \ )
+        \ ]
 endfunction
 
 

@@ -49,8 +49,7 @@ endfunction
 
 
 function! s:checkout(temp_name) dict
-  let msg = ['checkout[subversion]' '->' self.cwd]
-  call up2date#log#msg(fnamemodify(self.cwd, ':t'), msg)
+  call up2date#log#msg('checkout[subversion] -> ' . self.cwd, '(new)')
 endfunction
 
 

@@ -66,8 +66,8 @@ endfunction
 
 
 function! s:clone(temp_name) dict
-  let msg = ['checkout[mercurial] -> '.self.cwd]
-  call up2date#log#msg(fnamemodify(self.cwd, ':t'), msg)
+  let msg = []
+  call up2date#log#msg('checkout[mercurial] -> '.self.cwd, '(new)')
 endfunction
 
 
