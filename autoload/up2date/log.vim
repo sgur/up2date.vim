@@ -31,6 +31,7 @@ let g:up2date_log = []
 function! up2date#log#msg(title, lines)
   call up2date#log#log(a:title)
   call up2date#log#log(a:lines, 0)
+  echomsg a:title
 endfunction
 
 
