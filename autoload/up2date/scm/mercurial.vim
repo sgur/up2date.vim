@@ -29,7 +29,7 @@ endfunction
 
 
 function! s:arguments()
-  return '--encoding utf-8 --color false'
+  return '--encoding utf-8 --config color.mode=false'
 endfunction
 
 
