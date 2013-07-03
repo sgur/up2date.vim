@@ -38,38 +38,39 @@ endfunction
 let s:SID = s:SID_PREFIX()
 
 
-function! s:pull(temp_name) dict
-  let status = readfile(a:temp_name)
-  if !empty(status) && stridx(status[0], 'up to date') == -1
+function! s:pull(result, status, user)
+  if !empty(a:result) && stridx(a:result[0], 'up to date') == -1
     let changes = split(
           \ system(join([s:exec()
-          \ , '--git-dir="'.expand(self.cwd.'/.git').'"'
-          \ , '--work-tree="'.expand(self.cwd).'"'
-          \ , 'log', '--oneline', self.hash.'..HEAD','--']))
+          \ , '--git-dir="'.expand(a:user.cwd.'/.git').'"'
+          \ , '--work-tree="'.expand(a:user.cwd).'"'
+          \ , 'log', '--oneline', a:user.hash.'..HEAD','--']))
           \ , '\r\n\|\n\|\r')
     let msg = []
-    for s in split(status, '\n')
+    for s in split(result, '\n')
       call add(msg, '    '.s)
     endfor
     for c in changes
       call add(msg, '- '.c)
     endfor
-    call up2date#log#msg('update[git] -> '.self.cwd, msg)
+    call up2date#log#msg('update[git] -> '.a:user.cwd, msg)
   else
-    call up2date#log#log('update[git] -> '.self.cwd.' (no update)')
+    call up2date#log#log('update[git] -> '.a:user.cwd.' (no update)')
   endif
+  call up2date#run()
 endfunction
 
 
-function! s:checkout(temp_name) dict
-  if !empty(self.rev)
-    lcd `=self.cwd`
+function! s:checkout(result, status, user)
+  if !empty(a:user.rev)
+    lcd `=a:user.cwd`
     echo system(join([s:exec()
-          \ , '--git-dir="'.expand(self.cwd.'/.git').'"'
-          \ , '--work-tree="'.expand(self.cwd).'"'
-          \ , 'checkout', self.rev]))
+          \ , '--git-dir="'.expand(a:user.cwd.'/.git').'"'
+          \ , '--work-tree="'.expand(a:user.cwd).'"'
+          \ , 'checkout', a:user.rev]))
   endif
-  call up2date#log#msg('checkout[git] -> ' . self.cwd, '(new)')
+  call up2date#log#msg('checkout[git] -> ' . a:user.cwd, '(new)')
+  call up2date#run()
 endfunction
 
 
@@ -77,36 +78,37 @@ function! up2date#scm#git#update(branch, revision, dir)
   if !executable(s:exec())
     echoerr 'Up2date: "'.s:exec().'" command not found.'
   endif
-  if !empty(a:revision)
-    call system(join([s:exec()
-          \ , '--git-dir="'.expand(a:dir.'/.git').'"'
-          \ , '--work-tree="'.expand(a:dir).'"'
-          \ , 'checkout', a:revision]))
-    return
-  elseif !empty(a:branch)
-    call system(join([s:exec()
-          \ , '--git-dir="'.expand(a:dir.'/.git').'"'
-          \ , '--work-tree="'.expand(a:dir).'"'
-          \ , 'checkout', a:branch]))
-  else
-    call system(join([s:exec()
-          \ , '--git-dir="'.expand(a:dir.'/.git').'"'
-          \ , '--work-tree="'.expand(a:dir).'"'
-          \ , 'checkout', 'master']))
-  endif
-  let hash = split(system(join([s:exec()
-        \ , '--git-dir="'.expand(a:dir.'/.git').'"'
-        \ , 'log', '--oneline', '-1', '--format=%h'])))[0]
-  let cmd = join([s:exec()
-        \ , '--git-dir="'.expand(a:dir.'/.git').'"'
-        \ , '--work-tree="'.expand(a:dir).'"'
-        \ , 'pull', '--rebase'])
+  let cmds = []
   let env =
         \ { 'cwd'  : a:dir
-        \ , 'get'  : function(s:SID.'pull')
-        \ , 'hash' : hash
+        \ , 'hash' : 'HEAD'
         \ }
-  call up2date#worker#asynccommand(cmd, env)
+  if !empty(a:revision)
+    call up2date#shell#system(join([s:exec()
+          \ , '--git-dir="'.expand(a:dir.'/.git').'"'
+          \ , '--work-tree="'.expand(a:dir).'"'
+          \ , 'checkout', '-q', a:revision])
+          \ , s:SID . 'pull', env)
+    return
+  elseif !empty(a:branch)
+    call add(cmds, join([s:exec()
+          \ , '--git-dir="'.expand(a:dir.'/.git').'"'
+          \ , '--work-tree="'.expand(a:dir).'"'
+          \ , 'checkout', '-q', a:branch]))
+  else
+    call add(cmds, join([s:exec()
+          \ , '--git-dir="'.expand(a:dir.'/.git').'"'
+          \ , '--work-tree="'.expand(a:dir).'"'
+          \ , 'checkout', '-q', 'master']))
+  endif
+  let env.hash = split(system(join([s:exec()
+        \ , '--git-dir="'.expand(a:dir.'/.git').'"'
+        \ , 'log', '--oneline', '-1', '--format=%h'])))[0]
+  call add(cmds, join([s:exec()
+        \ , '--git-dir="'.expand(a:dir.'/.git').'"'
+        \ , '--work-tree="'.expand(a:dir).'"'
+        \ , 'pull', '--rebase']))
+  call up2date#shell#system(cmds, s:SID . 'pull', env)
 endfunction
 
 
@@ -119,10 +121,9 @@ function! up2date#scm#git#checkout(url, branch, revision, dir)
   let env = {
         \ 'cwd' : a:dir,
         \ 'rev' : a:revision,
-        \ 'get' : function(s:SID.'checkout'),
         \ 'is_checkout' : 1,
         \ }
-  call up2date#worker#asynccommand(cmd, env)
+  call up2date#shell#system(cmd, s:SID . 'checkout', env)
 endfunction
 
 

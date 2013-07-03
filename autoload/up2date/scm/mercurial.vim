@@ -39,16 +39,16 @@ endfunction
 let s:SID = s:SID_PREFIX()
 
 
-function! s:pull(temp_name) dict
-  if getfsize(a:temp_name) > 0
+function! s:pull(result, status, user)
+  if len(a:result) > 0
     let rev = system(join([s:exec(), s:arguments()
-          \ , '--cwd "'.expand(self.cwd).'"'
+          \ , '--cwd "'.expand(a:user.cwd).'"'
           \ , 'log', '--template ''{rev}''', '-l 1']))
     let status = system(join([s:exec(), s:arguments()
-          \ , '--cwd "'.expand(self.cwd).'"'
+          \ , '--cwd "'.expand(a:user.cwd).'"'
           \ , 'pull', '--update']))
     let changes = system(join([s:exec(), s:arguments()
-          \ , '--cwd "'.expand(self.cwd).'"'
+          \ , '--cwd "'.expand(a:user.cwd).'"'
           \ , 'log', '--rev', rev.'..tip'
           \ , '--template ''{node|short} {desc|strip|firstline}\n''']))
     let msg = []
@@ -58,16 +58,18 @@ function! s:pull(temp_name) dict
     for c in changes
       call add(msg, '- '.c)
     endfor
-    call up2date#log#msg('update[mercurial] -> '.self.cwd, msg)
+    call up2date#log#msg('update[mercurial] -> '.a:user.cwd, msg)
   else
-    call up2date#log#log('update[mercurial] -> '.self.cwd.' (no update)')
+    call up2date#log#log('update[mercurial] -> '. a:user.cwd .' (no update)')
   endif
+  call up2date#run()
 endfunction
 
 
-function! s:clone(temp_name) dict
+function! s:clone(result, status, user)
   let msg = []
-  call up2date#log#msg('checkout[mercurial] -> '.self.cwd, '(new)')
+  call up2date#log#msg('checkout[mercurial] -> '.a:user.cwd, '(new)')
+  call up2date#run()
 endfunction
 
 
@@ -75,18 +77,17 @@ function! up2date#scm#mercurial#update(branch, revision, dir)
   if !executable(s:exec())
     echoerr 'Up2date: "'.s:exec().'" command not found.'
   endif
+  let env = {'cwd' : a:dir }
+  let cmds = []
   if !empty(a:revision)
-    call system(join([s:exec(), 'pull', '--update', '-rev '.a:revision]))
+    call up2date#shell#system(join([s:exec(), 'pull', '--update', '-rev '.a:revision])
+          \ , s:SID . 'pull', env)
     return
   elseif !empty(a:branch)
-    call system(join([s:exec(), 'checkout', a:branch]))
+    call add(cmds, join([s:exec(), 'checkout', a:branch]))
   endif
-  let cmd = join([s:exec(), s:arguments(), '--cwd "'.expand(a:dir).'"', 'incoming', '-q'])
-  let env = {
-        \ 'cwd' : a:dir,
-        \ 'get' : function(s:SID.'pull'),
-        \ }
-  call up2date#worker#asynccommand(cmd, env)
+  call add(cmds, join([s:exec(), s:arguments(), '--cwd "'.expand(a:dir).'"', 'incoming', '-q']))
+  call up2date#shell#system(cmds, s:SID . 'pull', env)
 endfunction
 
 
@@ -100,9 +101,8 @@ function! up2date#scm#mercurial#checkout(url, branch, revision, dir)
   let cmd = join([s:exec(), s:arguments(), 'clone', opt, a:url, a:dir])
   let env = {
         \ 'cwd' : a:dir,
-        \ 'get' : function(s:SID.'clone'),
         \ 'is_checkout' : 1,
         \ }
-  call up2date#worker#asynccommand(cmd, env)
+  call up2date#shell#system(cmd, s:SID . 'clone', env)
 endfunction
 

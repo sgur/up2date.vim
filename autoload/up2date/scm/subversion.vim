@@ -34,40 +34,41 @@ endfunction
 let s:SID = s:SID_PREFIX()
 
 
-function! s:update(temp_name) dict
-  let lines = split(readfile(a:temp_name))
-  if !empty(lines)
+function! s:update(result, status, user)
+  if !empty(a:result)
     let msg = []
-    for l in lines
-      call add(msg, '> '.l)
+    for l in a:result
+      call add(msg, '> ' . l)
     endfor
-    call up2date#log#msg('update[subversion] -> '.self.cwd, msg)
+    call up2date#log#msg('update[subversion] -> ' . a:user.cwd, msg)
   else
-    call up2date#log#log('update[subversion] -> '.self.cwd.' (no update)')
+    call up2date#log#log('update[subversion] -> ' . a:user.cwd . ' (no update)')
   endif
+  call up2date#run()
 endfunction
 
 
-function! s:checkout(temp_name) dict
-  call up2date#log#msg('checkout[subversion] -> ' . self.cwd, '(new)')
+function! s:checkout(result, status, user)
+  call up2date#log#msg('checkout[subversion] -> ' . a:user.cwd, '(new)')
+  call up2date#run()
 endfunction
 
 
 function! up2date#scm#subversion#update(branch, revision, dir)
+  let cmds = []
   if !executable(s:exec())
     echoerr 'Up2date: "'.s:exec().'" command not found.'
   endif
   if !empty(a:branch)
-    echo system(join([s:exec(), 'switch', a:branch]))
+    call add(cmds, join([s:exec(), 'switch', a:branch]))
   endif
   let opt = '--quiet'
         \ . (!empty(a:revision) ? '--revision '. a:revision : '')
-  let cmd = join([s:exec(), 'update', opt, a:dir])
+  call add(cmds, join([s:exec(), 'update', opt, a:dir]))
   let env = {
-        \ 'cwd' : a:dir,
-        \ 'get' : function(s:SID.'update'),
+        \ 'cwd' : a:dir
         \ }
-  call up2date#worker#asynccommand(cmd, env)
+  call up2date#shell#system(cmds, s:SID . 'update', env)
 endfunction
 
 
@@ -79,9 +80,8 @@ function! up2date#scm#subversion#checkout(url, branch, revision, dir)
   let cmd = join([s:exec(), 'checkout', opt, a:url, a:dir])
   let env = {
         \ 'cwd' : a:dir,
-        \ 'get' : function(s:SID.'checkout'),
         \ 'is_checkout' : 1,
         \ }
-  call up2date#worker#asynccommand(cmd, env)
+  call up2date#shell#system(cmd, s:SID . 'checkout', env)
 endfunction
 
