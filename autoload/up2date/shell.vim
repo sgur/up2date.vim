@@ -59,7 +59,7 @@ function! s:system(cmd, handler, user_env)
   let vim_cmd = s:vim_executable() . ' --servername ' . v:servername
         \ . ' --remote-expr "AsyncShell__OnDone(''' . temp_id . ''', ' . result_var . ')"'
   if s:is_win
-    silent execute '!start /b cmd /c "' . exec_cmd . ' & ' . vim_cmd . ' >NUL"'
+    silent execute '!start /min cmd /c "' . exec_cmd . ' & ' . vim_cmd . ' >NUL"'
   else
     silent execute '! (echo ASYNC' . temp_id . ' > /dev/null ; '. exec_cmd . ' ; ' . vim_cmd . ' >/dev/null) &'
   endif
