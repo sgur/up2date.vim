@@ -42,7 +42,7 @@ function! s:pull(result, status, user)
   if !empty(a:result) && stridx(a:result[0], 'up to date') == -1
     let changes = split(
           \ system(join([s:exec()
-          \ , '--git-dir="'.expand(a:user.cwd.'/.git').'"'
+          \ , '--git-dir="'.expand(a:user.cwd).'/.git"'
           \ , '--work-tree="'.expand(a:user.cwd).'"'
           \ , 'log', '--oneline', a:user.hash.'..HEAD','--']))
           \ , '\r\n\|\n\|\r')
@@ -65,7 +65,7 @@ function! s:checkout(result, status, user)
   if !empty(a:user.rev)
     lcd `=a:user.cwd`
     echo system(join([s:exec()
-          \ , '--git-dir="'.expand(a:user.cwd.'/.git').'"'
+          \ , '--git-dir="'.expand(a:user.cwd).'/.git"'
           \ , '--work-tree="'.expand(a:user.cwd).'"'
           \ , 'checkout', a:user.rev]))
   endif
@@ -85,27 +85,27 @@ function! up2date#scm#git#update(branch, revision, dir)
         \ }
   if !empty(a:revision)
     call up2date#shell#system(join([s:exec()
-          \ , '--git-dir="'.expand(a:dir.'/.git').'"'
+          \ , '--git-dir="'.expand(a:dir).'/.git"'
           \ , '--work-tree="'.expand(a:dir).'"'
           \ , 'checkout', '-q', a:revision])
           \ , s:SID . 'pull', env)
     return
   elseif !empty(a:branch)
     call add(cmds, join([s:exec()
-          \ , '--git-dir="'.expand(a:dir.'/.git').'"'
+          \ , '--git-dir="'.expand(a:dir).'/.git"'
           \ , '--work-tree="'.expand(a:dir).'"'
           \ , 'checkout', '-q', a:branch]))
   else
     call add(cmds, join([s:exec()
-          \ , '--git-dir="'.expand(a:dir.'/.git').'"'
+          \ , '--git-dir="'.expand(a:dir).'/.git"'
           \ , '--work-tree="'.expand(a:dir).'"'
           \ , 'checkout', '-q', 'master']))
   endif
   let env.hash = split(system(join([s:exec()
-        \ , '--git-dir="'.expand(a:dir.'/.git').'"'
+        \ , '--git-dir="'.expand(a:dir).'/.git"'
         \ , 'log', '--oneline', '-1', '--format=%h'])))[0]
   call add(cmds, join([s:exec()
-        \ , '--git-dir="'.expand(a:dir.'/.git').'"'
+        \ , '--git-dir="'.expand(a:dir).'/.git"'
         \ , '--work-tree="'.expand(a:dir).'"'
         \ , 'pull', '--rebase']))
   call up2date#shell#system(cmds, s:SID . 'pull', env)
