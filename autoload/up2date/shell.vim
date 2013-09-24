@@ -130,6 +130,9 @@ function! up2date#shell#kill(id)
     let pids = map(results, 'matchstr(v:val, "\\s\\+\\d\\+\\s\\+\\zs\\d\\+\\ze")')
     call system('kill ' . join(pids, ' '))
   endif
+  if !v:shell_error
+    call filter(s:receivers, 'v:key != a:id')
+  endif
 endfunction
 
 
