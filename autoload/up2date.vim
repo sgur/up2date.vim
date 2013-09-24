@@ -111,8 +111,10 @@ endfunction
 
 function! up2date#run()
   let more = &more
+  let wi = &wildignore
   set nomore
-  try 
+  set wildignore&
+  try
     if empty(s:repos)
       call s:cycle_filetype(s:newplugins)
     else
@@ -128,6 +130,7 @@ function! up2date#run()
     endif
   finally
     let &more = more
+    let &wildignore = wi
   endtry
 endfunction
 
