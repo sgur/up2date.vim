@@ -62,7 +62,7 @@ function! s:checkout(result, status, user)
     echo system(join([s:exec()
           \ , 'checkout', a:user.rev]))
   endif
-  call up2date#log#msg('checkout[git] -> ' . a:user.cwd, '(new)')
+  call up2date#log#msg('checkout[git] -> ' . a:user.cwd . '(new)', '')
   call up2date#run()
 endfunction
 
