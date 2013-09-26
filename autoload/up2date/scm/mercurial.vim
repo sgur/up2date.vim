@@ -42,13 +42,10 @@ let s:SID = s:SID_PREFIX()
 function! s:pull(result, status, user)
   if len(a:result) > 0
     let rev = system(join([s:exec(), s:arguments()
-          \ , '--cwd "'.expand(a:user.cwd).'"'
           \ , 'log', '--template ''{rev}''', '-l 1']))
     let status = system(join([s:exec(), s:arguments()
-          \ , '--cwd "'.expand(a:user.cwd).'"'
           \ , 'pull', '--update']))
     let changes = system(join([s:exec(), s:arguments()
-          \ , '--cwd "'.expand(a:user.cwd).'"'
           \ , 'log', '--rev', rev.'..tip'
           \ , '--template ''{node|short} {desc|strip|firstline}\n''']))
     let msg = []
@@ -86,7 +83,7 @@ function! up2date#scm#mercurial#update(branch, revision, dir)
   elseif !empty(a:branch)
     call add(cmds, join([s:exec(), 'checkout', a:branch]))
   endif
-  call add(cmds, join([s:exec(), s:arguments(), '--cwd "'.expand(a:dir).'"', 'incoming', '-q']))
+  call add(cmds, join([s:exec(), s:arguments(), 'incoming', '-q']))
   call up2date#shell#system(cmds, s:SID . 'pull', env)
 endfunction
 

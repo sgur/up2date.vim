@@ -53,6 +53,9 @@ function! s:system(cmd, handler, user_env)
   else
     let target = a:cmd
   endif
+  if has_key(a:user_env, 'cwd')
+    let target = 'cd ' . a:user_env.cwd . ' && ' . target
+  endif
   let exec_cmd = '(' . (s:is_win ? 'title ' . temp_id . '& ' : '') . target . ') '
         \ . s:shellredir(temp_file)
   let result_var = s:is_win ? '\%ERRORLEVEL\%' : '$?'
