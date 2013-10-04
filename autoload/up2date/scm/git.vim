@@ -45,8 +45,8 @@ endfunction
 function! s:pull(result, status, user)
   if !empty(a:result) && stridx(a:result[0], 'up to date') == -1
     let msg = []
-    for s in split(result, '\n')
-      call add(msg, '    '.s)
+    for s in split(a:result, '\n')
+      call add(msg, '    ' . s)
     endfor
     call up2date#log#msg('update[git] -> '.a:user.cwd, msg)
   else
@@ -57,11 +57,6 @@ endfunction
 
 
 function! s:checkout(result, status, user)
-  if !empty(a:user.rev)
-    lcd `=a:user.cwd`
-    echo system(join([s:exec()
-          \ , 'checkout', a:user.rev]))
-  endif
   call up2date#log#msg('checkout[git] -> ' . a:user.cwd . '(new)', '')
   call up2date#run()
 endfunction
@@ -98,13 +93,14 @@ function! up2date#scm#git#checkout(url, branch, revision, dir)
     echoerr 'Up2date: "'.s:exec().'" command not found.'
   endif
   let opt = !empty(a:branch) ? '--branch '.a:branch : ''
-  let cmd = join([s:exec(), 'clone', opt, a:url, a:dir])
+  let cmds = [join([s:exec(), 'clone', opt, a:url, a:dir])
+        \ , join([s:exec(), 'checkout', a:user.rev])]
   let env = {
         \ 'cwd' : a:dir,
         \ 'rev' : a:revision,
         \ 'is_checkout' : 1,
         \ }
-  call up2date#shell#system(cmd, s:SID . 'checkout', env)
+  call up2date#shell#system(cmds, s:SID . 'checkout', env)
 endfunction
 
 
