@@ -94,7 +94,7 @@ function! up2date#scm#git#checkout(url, branch, revision, dir)
   endif
   let opt = !empty(a:branch) ? '--branch '.a:branch : ''
   let cmds = [join([s:exec(), 'clone', opt, a:url, a:dir])
-        \ , join([s:exec(), 'checkout', a:user.rev])]
+        \ , join([s:exec(), 'checkout', a:revision])]
   let env = {
         \ 'cwd' : a:dir,
         \ 'rev' : a:revision,
