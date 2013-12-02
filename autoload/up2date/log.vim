@@ -40,7 +40,7 @@ function! up2date#log#log(lines, ...)
   if is_date_header
     call add(g:up2date_log, '# ' . s:time())
   endif
-  if type(a:lines ) == type([])
+  if type(a:lines) == type([])
     call extend(g:up2date_log, a:lines)
   else
     call add(g:up2date_log, a:lines)

@@ -49,15 +49,14 @@ function! s:system(cmd, handler, user_env)
         \ , 'user' : a:user_env
         \ , 'temp_file' : temp_file}
   if type(a:cmd) == type([])
-    let target = join(a:cmd, ' && ')
+    let target = join(map(a:cmd, 'v:val . s:shellredir(temp_file)'), ' && ')
   else
     let target = a:cmd
   endif
   if has_key(a:user_env, 'cwd')
     let target = 'cd ' . a:user_env.cwd . ' && ' . target
   endif
-  let exec_cmd = '(' . (s:is_win ? 'title ' . temp_id . '& ' : '') . target . ') '
-        \ . s:shellredir(temp_file)
+  let exec_cmd = '(' . (s:is_win ? 'title ' . temp_id . '& ' : '') . target . ')'
   let result_var = s:is_win ? '\%ERRORLEVEL\%' : '$?'
   let vim_cmd = s:vim_executable() . ' --servername ' . v:servername
         \ . ' --remote-expr "AsyncShell__OnDone(''' . temp_id . ''', ' . result_var . ')"'
@@ -106,10 +105,10 @@ function! AsyncShell__OnDone(temp_id, ret_code)
   let recv.is_finished = 1
   let temp_file = recv.temp_file
   call call(recv.handler,
-        \ [ readfile(expand(temp_file))
+        \ [ readfile(temp_file)
         \ , eval(a:ret_code)
         \ , recv.user])
-  call delete(a:temp_file)
+  call delete(temp_file)
   call remove(s:receivers, a:temp_id)
   return ""
 endfunction
