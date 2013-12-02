@@ -36,10 +36,7 @@ let s:SID = s:SID_PREFIX()
 
 function! s:update(result, status, user)
   if !empty(a:result)
-    let msg = []
-    for l in a:result
-      call add(msg, '> ' . l)
-    endfor
+    let msg = map(a:result, 'repeat(" ", 4) . v:val')
     call up2date#log#msg('update[subversion] -> ' . a:user.cwd, msg)
   else
     call up2date#log#log('update[subversion] -> ' . a:user.cwd . ' (no update)')

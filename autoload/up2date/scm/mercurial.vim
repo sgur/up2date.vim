@@ -48,10 +48,7 @@ function! s:pull(result, status, user)
     let changes = system(join([s:exec(), s:arguments()
           \ , 'log', '--rev', rev.'..tip'
           \ , '--template ''{node|short} {desc|strip|firstline}\n''']))
-    let msg = []
-    for s in split(status, '\n')
-      call add(msg, '    '.s)
-    endfor
+    let msg = map(a:result, 'repeat(" ", 4) . v:val')
     for c in changes
       call add(msg, '- '.c)
     endfor
