@@ -80,7 +80,7 @@ function! up2date#scm#git#update(branch, revision, dir)
           \ , 'checkout', '-q', 'master']))
   endif
   call add(cmds, join([s:exec()
-        \ , 'pull', '--verbose', '--recurse-submodules', '--rebase']))
+        \ , 'pull', '--verbose', '--recurse-submodules']))
   call up2date#shell#system(cmds, s:SID . 'pull', env)
 endfunction
 
