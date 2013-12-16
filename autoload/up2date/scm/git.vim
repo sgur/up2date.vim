@@ -43,7 +43,7 @@ function! s:expand(path)
 endfunction
 
 function! s:pull(result, status, user)
-  if !empty(a:result) && stridx(a:result[-1], 'up to date') == -1
+  if !empty(a:result) && stridx(a:result[-1], 'up-to-date') == -1
     let msg = map(a:result, 'repeat(" ", 4) . v:val')
     call up2date#log#msg('update[git] -> '.a:user.cwd, msg)
   else
