@@ -55,6 +55,9 @@ endfunction
 
 function! s:checkout(result, status, user)
   call up2date#log#msg('checkout[git] -> ' . a:user.cwd . '(new)', '')
+  call up2date#util#add_runtimepath(a:user.cwd)
+  call up2date#util#source_plugin(a:user.cwd)
+  call up2date#util#helptags(a:user.cwd)
   call up2date#run()
 endfunction
 

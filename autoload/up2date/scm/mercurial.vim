@@ -63,6 +63,9 @@ endfunction
 function! s:clone(result, status, user)
   let msg = []
   call up2date#log#msg('checkout[mercurial] -> '.a:user.cwd, '(new)')
+  call up2date#util#add_runtimepath(a:user.cwd)
+  call up2date#util#source_plugin(a:user.cwd)
+  call up2date#util#helptags(a:user.cwd)
   call up2date#run()
 endfunction
 

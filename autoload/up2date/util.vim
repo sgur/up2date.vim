@@ -31,16 +31,16 @@ endfunction
 
 
 function! up2date#util#add_runtimepath(dir)
-  let &runtimepath = a:dir.','.&runtimepath
-  let after_dir = expand(dir.'/after')
+  let &runtimepath = a:dir . ',' . &runtimepath
+  let after_dir = expand(a:dir . '/after')
   if isdirectory(after_dir)
-    let &runtimepath .= ','.afterdir
+    let &runtimepath .= ',' . afterdir
   endif
 endfunction
 
 
 function! up2date#util#helptags(dir)
-  let doc_dir = expand(a:dir.'/doc')
+  let doc_dir = expand(a:dir . '/doc')
   if isdirectory(doc_dir) && !findfile('tags', doc_dir)
     execute 'helptags' doc_dir
   endif
