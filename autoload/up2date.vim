@@ -68,7 +68,7 @@ function! up2date#status()
   endif
   let [installable, not_installed] = s:diff_bundles(source)
   call up2date#log#log('## Status', 1)
-  call up2date#log#log('### Ready to install', 0)
+  call up2date#log#log('### Available', 0)
   call up2date#log#log(installable, 0)
   call up2date#log#log('### Unrecognized', 0)
   call up2date#log#log(not_installed, 0)
