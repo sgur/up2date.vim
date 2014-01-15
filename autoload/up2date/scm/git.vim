@@ -92,7 +92,7 @@ function! up2date#scm#git#checkout(url, branch, revision, dir)
   if !executable(s:exec())
     echoerr 'Up2date: "'.s:exec().'" command not found.'
   endif
-  let opt = !empty(a:branch) ? '--branch '.a:branch : ''
+  let opt = '--recurse-submodules ' . (!empty(a:branch) ? '--branch '.a:branch : '')
   let cmds = [join([s:exec(), 'clone', opt, a:url, a:dir])
         \ , join([s:exec(), 'checkout', a:revision])]
   let env = {
