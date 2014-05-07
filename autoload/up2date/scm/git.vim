@@ -42,6 +42,13 @@ function! s:expand(path)
   return substitute(expand(a:path), '\\', '/', 'g')
 endfunction
 
+
+function! s:shallow_opt()
+  return get(g:, 'up2date_git_use_shallow', 0)
+        \ ? '--depth=1'
+        \ : ''
+endfunction
+
 function! s:pull(result, status, user)
   if !empty(a:result) && stridx(a:result[-1], 'up-to-date') == -1
     let msg = map(a:result, 'repeat(" ", 4) . v:val')
@@ -83,7 +90,7 @@ function! up2date#scm#git#update(branch, revision, dir)
           \ , 'checkout', '-q', 'master']))
   endif
   call add(cmds, join([s:exec()
-        \ , 'pull', '--verbose', '--recurse-submodules']))
+        \ , 'pull', '--verbose', '--recurse-submodules', s:shallow_opt()]))
   call up2date#shell#system(cmds, s:SID . 'pull', env)
 endfunction
 
@@ -93,7 +100,7 @@ function! up2date#scm#git#checkout(url, branch, revision, dir)
     echoerr 'Up2date: "'.s:exec().'" command not found.'
   endif
   let opt = '--recurse-submodules ' . (!empty(a:branch) ? '--branch '.a:branch : '')
-  let cmds = [join([s:exec(), 'clone', opt, a:url, a:dir])
+  let cmds = [join([s:exec(), 'clone', opt, s:shallow_opt(), a:url, a:dir])
         \ , join([s:exec(), 'checkout', a:revision])]
   let env = {
         \ 'cwd' : a:dir,
