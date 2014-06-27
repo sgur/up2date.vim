@@ -70,18 +70,18 @@ function! up2date#scm#git#update(branch, revision, dir)
   let env =
         \ { 'cwd'  : a:dir
         \ }
-  if !empty(a:revision)
-    call up2date#shell#system(join([s:exec()
-          \ , 'checkout', '-q', a:revision])
-          \ , s:SID . 'pull', env)
-    return
-  elseif !empty(a:branch)
-    call add(cmds, join([s:exec()
-          \ , 'checkout', '-q', a:branch]))
-  else
-    call add(cmds, join([s:exec()
-          \ , 'checkout', '-q', 'master']))
-  endif
+  " if !empty(a:revision)
+  "   call up2date#shell#system(join([s:exec()
+  "         \ , 'checkout', '-q', a:revision])
+  "         \ , s:SID . 'pull', env)
+  "   return
+  " elseif !empty(a:branch)
+  "   call add(cmds, join([s:exec()
+  "         \ , 'checkout', '-q', a:branch]))
+  " else
+  "   call add(cmds, join([s:exec()
+  "         \ , 'checkout', '-q', 'master']))
+  " endif
   call add(cmds, join([s:exec()
         \ , 'pull', '--verbose', '--recurse-submodules']))
   call up2date#shell#system(cmds, s:SID . 'pull', env)
