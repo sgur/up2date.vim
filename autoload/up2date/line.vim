@@ -41,7 +41,8 @@ function! up2date#line#parse(line)
         \ 'line'     : a:line,
         \ 'revision' : opt.revision,
         \ 'scm'      : !empty(opt.scm) ? opt.scm : repo.scm,
-        \ 'target'   : !empty(opt.target) ? opt.target : repo.dir,
+        \ 'target'   : !empty(opt.target) ? opt.target
+        \   : substitute(substitute(repo.dir, '^vim-', '', ''), '[.-]vim$', '', ''),
         \ 'url'      : repo.url,
         \ 'filetype' : opt.filetype,
         \ }
