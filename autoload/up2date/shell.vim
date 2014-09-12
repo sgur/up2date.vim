@@ -11,15 +11,9 @@ let s:is_win = has('win32') || has('win64')
 let s:is_mac = !s:is_win && (has('mac') || has('macunix') || has('gui_macvim')
       \ || (!isdirectory('/proc') && executable('sw_vers')))
 
-if has('gui_running')
-  if s:is_mac
-    if executable('mvim')
-      let s:executable = 'mvim'
-    endif
-  else
-    if executable('gvim')
-      let s:executable = 'gvim'
-    endif
+if has('gui_running') && s:is_mac
+  if executable('mvim')
+    let s:executable = 'mvim'
   endif
 elseif executable('vim')
   let s:executable = 'vim'
@@ -29,7 +23,7 @@ function! s:vim_executable()
   if !exists('s:executable')
     throw 'asyncshell: executable not found'
   endif
-  return s:executable . ' -u NONE --noplugin'
+  return s:executable . ' -N -u NONE --noplugin'
 endfunction
 
 function! s:shellredir(temp_file)
@@ -61,7 +55,7 @@ function! s:system(cmd, handler, user_env)
   let vim_cmd = s:vim_executable() . ' --servername ' . v:servername
         \ . ' --remote-expr "AsyncShell__OnDone(''' . temp_id . ''', ' . result_var . ')"'
   if s:is_win
-    silent execute '!start /min cmd /c "' . exec_cmd . ' & ' . vim_cmd . ' >NUL"'
+    silent execute '!start /b cmd /c "' . exec_cmd . ' & ' . vim_cmd . ' >NUL"'
   else
     silent execute '! (echo ASYNC' . temp_id . ' > /dev/null ; '. exec_cmd . ' ; ' . vim_cmd . ' >/dev/null) &'
   endif
